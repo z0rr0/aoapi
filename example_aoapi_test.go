@@ -4,18 +4,36 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"time"
 
 	"github.com/z0rr0/aoapi"
 )
 
+func gptServer() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{"id":"test","object":"chat.completion","created":1677652288,` +
+			`"choices":[{"index":0,"message":{"content":"Hallo, wie geht es dir? Was machst du?","role":"assistant"},` +
+			`"finish_reason":"stop"}],"usage":{"prompt_tokens":35,"completion_tokens":13,"total_tokens":48}}`
+
+		if _, err := fmt.Fprint(w, response); err != nil {
+			panic(err)
+		}
+	}))
+}
+
 func ExampleCompletion() {
-	const uri = "https://api.openai.com/v1/chat/completions"
 	var (
 		key                 = os.Getenv("OPENAI_API_KEY")
 		temperature float32 = 0
 	)
+
+	// test ChatGPT server, for production use: "https://api.openai.com/v1/chat/completions"
+	server := gptServer()
+	defer server.Close()
+	uri := server.URL
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
