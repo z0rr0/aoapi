@@ -242,7 +242,7 @@ func TestCompletion(t *testing.T) {
 		},
 		MaxTokens: 100,
 	}
-	response, err := Completion(context.Background(), client, request, s.URL, "test")
+	response, err := Completion(context.Background(), client, request, Auth{Bearer: "test", URL: s.URL})
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -280,7 +280,7 @@ func TestCompletionFailedStatus(t *testing.T) {
 		},
 		MaxTokens: 100,
 	}
-	_, err := Completion(context.Background(), client, request, s.URL, "test")
+	_, err := Completion(context.Background(), client, request, Auth{Bearer: "test", URL: s.URL})
 
 	if err == nil {
 		t.Fatal("expected error")
@@ -290,7 +290,7 @@ func TestCompletionFailedStatus(t *testing.T) {
 func TestCompletionFailedRequest(t *testing.T) {
 	client := http.DefaultClient
 	request := &Request{Model: ModelGPT35Turbo} // no messages
-	_, err := Completion(context.Background(), client, request, ":", "test")
+	_, err := Completion(context.Background(), client, request, Auth{Bearer: "test", URL: ":"})
 
 	if err == nil {
 		t.Fatal("expected error")
@@ -320,7 +320,7 @@ func TestCompletionFailedJSON(t *testing.T) {
 		},
 		MaxTokens: 100,
 	}
-	_, err := Completion(context.Background(), client, request, s.URL, "test")
+	_, err := Completion(context.Background(), client, request, Auth{Bearer: "test", URL: s.URL})
 
 	if err == nil {
 		t.Fatal("expected error")
@@ -337,7 +337,7 @@ func TestCompletionFailedURL(t *testing.T) {
 		},
 		MaxTokens: 100,
 	}
-	_, err := Completion(context.Background(), client, request, "http://127.0.0.1:99999", "test")
+	_, err := Completion(context.Background(), client, request, Auth{Bearer: "test", URL: "http://127.0.0.1:99999"})
 
 	if err == nil {
 		t.Fatal("expected error")
@@ -364,7 +364,7 @@ func TestCompletionFailedContent(t *testing.T) {
 		},
 		MaxTokens: 100,
 	}
-	_, err := Completion(context.Background(), client, request, s.URL, "test")
+	_, err := Completion(context.Background(), client, request, Auth{Bearer: "test", URL: s.URL})
 
 	if err == nil {
 		t.Fatal("expected error")

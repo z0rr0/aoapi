@@ -34,10 +34,13 @@ request := &aoapi.Request{
     MaxTokens: 512,  // 0 - no limit
 }
 
-key := os.Getenv("OPENAI_API_KEY")
-uri := "https://api.openai.com/v1/chat/completions"
+auth := aoapi.Auth{
+	Bearer: os.Getenv("OPENAI_API_KEY"),
+	Organization: os.Getenv("OPENAI_ORGANIZATION"),
+	URL: "https://api.openai.com/v1/chat/completions",
+}
 
-resp, err := aoapi.Completion(ctx, client, request, uri, key)
+resp, err := aoapi.Completion(ctx, client, request, auth)
 if err != nil {
     panic(err)  // or handle error
 }

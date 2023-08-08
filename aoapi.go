@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -96,19 +97,23 @@ func (r *Request) marshal() (io.Reader, error) {
 	return bytes.NewReader(data), nil
 }
 
-func (r *Request) build(ctx context.Context, uri, bearer string) (*http.Request, error) {
+func (r *Request) build(ctx context.Context, auth Auth) (*http.Request, error) {
 	body, err := r.marshal()
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, uri, body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, auth.URL, body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", bearer))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", auth.Bearer))
+
+	if auth.Organization != "" {
+		req.Header.Set("OpenAI-Organization", auth.Organization)
+	}
 
 	return req, nil
 }
@@ -138,11 +143,11 @@ func (response *Response) build(resp *http.Response) error {
 
 // String returns the first message of the response.
 func (response *Response) String() string {
-	if len(response.Choices) == 0 {
-		return ""
+	var b strings.Builder
+	for i := range response.Choices {
+		b.WriteString(response.Choices[i].Message.Content)
 	}
-
-	return response.Choices[0].Message.Content
+	return b.String()
 }
 
 // UsageInfo returns API tokens usage information.
@@ -152,9 +157,16 @@ func (response *Response) UsageInfo() string {
 	)
 }
 
+// Auth is a struct of API authentication information.
+type Auth struct {
+	Bearer       string
+	Organization string
+	URL          string
+}
+
 // Completion sends a request to the API and returns a response.
-func Completion(ctx context.Context, client *http.Client, r *Request, uri, bearer string) (*Response, error) {
-	request, err := r.build(ctx, uri, bearer)
+func Completion(ctx context.Context, client *http.Client, r *Request, auth Auth) (*Response, error) {
+	request, err := r.build(ctx, auth)
 	if err != nil {
 		return nil, err
 	}
