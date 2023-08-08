@@ -4,11 +4,15 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"time"
 )
+
+// RequiredParamError is an error that occurs when a required parameter is missing.
+var RequiredParamError = fmt.Errorf("required parameter is missing")
 
 // Role is a type of user message role.
 type Role string
@@ -80,12 +84,12 @@ type Request struct {
 }
 
 func (r *Request) marshal() (io.Reader, error) {
-	if len(r.Messages) == 0 {
-		return nil, fmt.Errorf("messages must not be empty")
+	if r.Model == "" {
+		return nil, errors.Join(RequiredParamError, fmt.Errorf("model must not be empty"))
 	}
 
-	if r.Model == "" {
-		return nil, fmt.Errorf("model must not be empty")
+	if len(r.Messages) == 0 {
+		return nil, errors.Join(RequiredParamError, fmt.Errorf("messages must not be empty"))
 	}
 
 	data, err := json.Marshal(r)

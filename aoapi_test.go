@@ -1,10 +1,42 @@
 package aoapi
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"io"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
+
+func compareResponses(a, b Response) bool {
+	if a.ID != b.ID {
+		return false
+	}
+	if a.Object != b.Object {
+		return false
+	}
+	if a.Created != b.Created {
+		return false
+	}
+	if a.Usage != b.Usage {
+		return false
+	}
+
+	// compare Choices
+	if len(a.Choices) != len(b.Choices) {
+		return false
+	}
+	for i := range a.Choices {
+		if a.Choices[i] != b.Choices[i] {
+			return false
+		}
+	}
+
+	return true
+}
 
 func TestRequestMarshal(t *testing.T) {
 	var (
@@ -18,26 +50,30 @@ func TestRequestMarshal(t *testing.T) {
 	)
 
 	testCases := []struct {
-		name     string
-		request  Request
-		err      string
-		expected []string
-		length   int
+		name      string
+		request   Request
+		err       error
+		errString string
+		expected  []string
+		length    int
 	}{
 		{
-			name:    "empty request",
-			request: Request{},
-			err:     "messages must not be empty",
+			name:      "empty request",
+			request:   Request{},
+			err:       RequiredParamError,
+			errString: "required parameter is missing\nmodel must not be empty",
 		},
 		{
-			name:    "empty messages",
-			request: Request{Model: ModelGPT4K32},
-			err:     "messages must not be empty",
+			name:      "empty messages",
+			request:   Request{Model: ModelGPT4K32},
+			err:       RequiredParamError,
+			errString: "required parameter is missing\nmessages must not be empty",
 		},
 		{
-			name:    "empty model",
-			request: Request{Messages: []Message{{Role: RoleSystem, Content: "Hello, world!"}}},
-			err:     "model must not be empty",
+			name:      "empty model",
+			request:   Request{Messages: []Message{{Role: RoleSystem, Content: "Hello, world!"}}},
+			err:       RequiredParamError,
+			errString: "required parameter is missing\nmodel must not be empty",
 		},
 		{
 			name: "valid request",
@@ -115,6 +151,33 @@ func TestRequestMarshal(t *testing.T) {
 			},
 			length: 304,
 		},
+		{
+			name: "partial optional",
+			request: Request{
+				Model: ModelGPT35Turbo,
+				Messages: []Message{
+					{Role: RoleSystem, Content: "This is a system message"},
+					{Role: RoleUser, Content: "This is a user message"},
+					{Role: RoleAssistant, Content: "This is an assistant message", Name: "assistant"},
+				},
+				MaxTokens:   250,
+				Temperature: &temperature,
+			},
+			expected: []string{
+				`"model":"gpt-3.5-turbo"`,
+				`"messages":[`,
+				`"role":"system"`,
+				`"content":"This is a system message"`,
+				`"role":"user"`,
+				`"content":"This is a user message"`,
+				`"role":"assistant"`,
+				`"content":"This is an assistant message"`,
+				`"name":"assistant"`,
+				`"max_tokens":250`,
+				`"temperature":0.5`,
+			},
+			length: 260,
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -122,14 +185,17 @@ func TestRequestMarshal(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			reader, err := tc.request.marshal()
 			if err != nil {
-				if err.Error() != tc.err {
-					t.Fatalf("unexpected error: %v", err)
+				if errString := err.Error(); errString != tc.errString {
+					t.Fatalf("unexpected error: %v", errString)
+				}
+				if !errors.Is(err, tc.err) {
+					t.Fatalf("expected error type %v, but got %v", tc.err, err)
 				}
 				return
 			}
 
-			if tc.err != "" {
-				t.Fatalf("expected error %q", tc.err)
+			if tc.errString != "" {
+				t.Fatalf("expected error %q", tc.errString)
 			}
 
 			buf := new(strings.Builder)
@@ -151,5 +217,115 @@ func TestRequestMarshal(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestCompletion(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{"id":"test","object":"chat.completion","created":1677652288,` +
+			`"choices":[{"index":0,"message":{"content":"Message","role":"assistant"},"finish_reason":"stop"}],` +
+			`"usage":{"prompt_tokens":4,"completion_tokens":6,"total_tokens":10}}`
+
+		if _, err := fmt.Fprint(w, response); err != nil {
+			t.Error(err)
+		}
+	}))
+	defer s.Close()
+
+	client := s.Client()
+	request := &Request{
+		Model: ModelGPT35Turbo,
+		Messages: []Message{
+			{Role: RoleSystem, Content: "This is a system message"},
+			{Role: RoleUser, Content: "This is a user message"},
+		},
+		MaxTokens: 100,
+	}
+	response, err := Completion(context.Background(), client, request, s.URL, "test")
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := Response{
+		ID:      "test",
+		Object:  "chat.completion",
+		Created: 1677652288,
+		Choices: []Choice{{Index: 0, Message: Message{Content: "Message", Role: RoleAssistant}, FinishReason: "stop"}},
+		Usage: Usage{
+			PromptTokens:     4,
+			CompletionTokens: 6,
+			TotalTokens:      10,
+		},
+	}
+
+	if r := *response; !compareResponses(expected, r) {
+		t.Fatalf("expected %v, got %v", expected, r)
+	}
+}
+
+func TestCompletionFailedStatus(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+	}))
+	defer s.Close()
+
+	client := s.Client()
+	request := &Request{
+		Model: ModelGPT35Turbo,
+		Messages: []Message{
+			{Role: RoleSystem, Content: "This is a system message"},
+			{Role: RoleUser, Content: "This is a user message"},
+		},
+		MaxTokens: 100,
+	}
+	_, err := Completion(context.Background(), client, request, s.URL, "test")
+
+	if err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestCompletionFailedJSON(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		if _, err := fmt.Fprint(w, `{"id":"test","object":"chat.completion,`); err != nil {
+			t.Error(err)
+		}
+	}))
+	defer s.Close()
+
+	client := s.Client()
+	request := &Request{
+		Model: ModelGPT35Turbo,
+		Messages: []Message{
+			{Role: RoleSystem, Content: "This is a system message"},
+			{Role: RoleUser, Content: "This is a user message"},
+		},
+		MaxTokens: 100,
+	}
+	_, err := Completion(context.Background(), client, request, s.URL, "test")
+
+	if err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestCompletionFailedURL(t *testing.T) {
+	client := http.DefaultClient
+	request := &Request{
+		Model: ModelGPT35Turbo,
+		Messages: []Message{
+			{Role: RoleSystem, Content: "This is a system message"},
+			{Role: RoleUser, Content: "This is a user message"},
+		},
+		MaxTokens: 100,
+	}
+	_, err := Completion(context.Background(), client, request, "http://127.0.0.1:99999", "test")
+
+	if err == nil {
+		t.Fatal("expected error")
 	}
 }
