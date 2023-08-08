@@ -24,9 +24,6 @@ var (
 // Role is a type of user message role.
 type Role string
 
-// Model is a type of AI model name.
-type Model string
-
 // User message roles.
 const (
 	RoleSystem    Role = "system"
@@ -34,12 +31,24 @@ const (
 	RoleAssistant Role = "assistant"
 )
 
+// Model is a type of AI model name.
+type Model string
+
 // AI model names.
 const (
 	ModelGPT35Turbo    Model = "gpt-3.5-turbo"
 	ModelGPT35TurboK16 Model = "gpt-3.5-turbo-16k"
 	ModelGPT4          Model = "gpt-4"
 	ModelGPT4K32       Model = "gpt-4-32k"
+)
+
+// FinishReason is a type of response finish reason.
+type FinishReason string
+
+// Finish reasons variants.
+const (
+	FinishReasonLength FinishReason = "length"
+	FinishReasonStop   FinishReason = "stop"
 )
 
 // Message is a struct of user message.
@@ -51,9 +60,9 @@ type Message struct {
 
 // Choice is a struct of response choice.
 type Choice struct {
-	Index        int     `json:"index"`
-	Message      Message `json:"message"`
-	FinishReason string  `json:"finish_reason"`
+	Index        int          `json:"index"`
+	Message      Message      `json:"message"`
+	FinishReason FinishReason `json:"finish_reason"`
 }
 
 // Usage is additional information about the response limit usage.
@@ -143,9 +152,15 @@ func (response *Response) build(resp *http.Response) error {
 
 // String returns the first message of the response.
 func (response *Response) String() string {
+	const reasonMarker = " [reason=length]"
 	var b strings.Builder
+
 	for i := range response.Choices {
 		b.WriteString(response.Choices[i].Message.Content)
+
+		if response.Choices[i].FinishReason == FinishReasonLength {
+			b.WriteString(reasonMarker)
+		}
 	}
 	return b.String()
 }

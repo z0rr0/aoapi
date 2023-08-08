@@ -376,22 +376,65 @@ func TestCompletionFailedContent(t *testing.T) {
 }
 
 func TestResponse_String(t *testing.T) {
-	var expected string
-	response := Response{
-		ID:      "test",
-		Object:  "chat.completion",
-		Created: 1677652288,
+	testCases := []struct {
+		name     string
+		response Response
+		expected string
+	}{
+		{
+			name: "empty",
+			response: Response{
+				ID:      "test",
+				Object:  "chat.completion",
+				Created: 1677652288,
+			},
+		},
+		{
+			name: "message",
+			response: Response{
+				ID:      "test",
+				Object:  "chat.completion",
+				Created: 1677652288,
+				Choices: []Choice{
+					{
+						Index:        0,
+						Message:      Message{Content: "This is ", Role: RoleAssistant},
+						FinishReason: FinishReasonStop,
+					},
+					{
+						Index:        1,
+						Message:      Message{Content: "a message.", Role: RoleAssistant},
+						FinishReason: FinishReasonStop,
+					},
+				},
+			},
+			expected: "This is a message.",
+		},
+		{
+			name: "length",
+			response: Response{
+				ID:      "test",
+				Object:  "chat.completion",
+				Created: 1677652288,
+				Choices: []Choice{
+					{
+						Index:        0,
+						Message:      Message{Content: "This is a message.", Role: RoleAssistant},
+						FinishReason: FinishReasonLength,
+					},
+				},
+			},
+			expected: "This is a message. [reason=length]",
+		},
 	}
 
-	if s := response.String(); s != expected {
-		t.Errorf("expected %v, got %v", expected, s)
-	}
-
-	expected = "This is a message"
-	response.Choices = []Choice{{Message: Message{Content: expected, Role: RoleAssistant}, FinishReason: "stop"}}
-
-	if s := response.String(); s != expected {
-		t.Errorf("expected %v, got %v", expected, s)
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			if s := tc.response.String(); s != tc.expected {
+				t.Errorf("expected %v, got %v", tc.expected, s)
+			}
+		})
 	}
 }
 
@@ -400,7 +443,9 @@ func TestResponse_UsageInfo(t *testing.T) {
 		ID:      "test",
 		Object:  "chat.completion",
 		Created: 1677652288,
-		Choices: []Choice{{Message: Message{Content: "This is a message", Role: RoleAssistant}, FinishReason: "stop"}},
+		Choices: []Choice{
+			{Message: Message{Content: "This is a message", Role: RoleAssistant}, FinishReason: FinishReasonStop},
+		},
 		Usage: Usage{
 			PromptTokens:     4,
 			CompletionTokens: 6,
