@@ -1,3 +1,4 @@
+// Package aoapi provides a client for the OpenAI chat completion API.
 package aoapi
 
 import (
