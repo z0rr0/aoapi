@@ -287,6 +287,20 @@ func TestCompletionFailedStatus(t *testing.T) {
 	}
 }
 
+func TestCompletionFailedRequest(t *testing.T) {
+	client := http.DefaultClient
+	request := &Request{Model: ModelGPT35Turbo} // no messages
+	_, err := Completion(context.Background(), client, request, ":", "test")
+
+	if err == nil {
+		t.Fatal("expected error")
+	}
+
+	if !errors.Is(err, RequiredParamError) {
+		t.Fatalf("expected %v, got %v", ResponseError, err)
+	}
+}
+
 func TestCompletionFailedJSON(t *testing.T) {
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -327,5 +341,75 @@ func TestCompletionFailedURL(t *testing.T) {
 
 	if err == nil {
 		t.Fatal("expected error")
+	}
+}
+
+func TestCompletionFailedContent(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		response := `{"id":"test","object":"chat.completion","created":1677652288,` +
+			`"usage":{"prompt_tokens":4,"completion_tokens":6,"total_tokens":10}}`
+
+		if _, err := fmt.Fprint(w, response); err != nil {
+			t.Error(err)
+		}
+	}))
+	defer s.Close()
+
+	client := s.Client()
+	request := &Request{
+		Model: ModelGPT35Turbo,
+		Messages: []Message{
+			{Role: RoleSystem, Content: "This is a system message"},
+			{Role: RoleUser, Content: "This is a user message"},
+		},
+		MaxTokens: 100,
+	}
+	_, err := Completion(context.Background(), client, request, s.URL, "test")
+
+	if err == nil {
+		t.Fatal("expected error")
+	}
+
+	if !errors.Is(err, ResponseError) {
+		t.Fatalf("expected %v, got %v", ResponseError, err)
+	}
+}
+
+func TestResponse_String(t *testing.T) {
+	expected := "This is a message"
+	response := Response{
+		ID:      "test",
+		Object:  "chat.completion",
+		Created: 1677652288,
+		Choices: []Choice{{Message: Message{Content: expected, Role: RoleAssistant}, FinishReason: "stop"}},
+		Usage: Usage{
+			PromptTokens:     4,
+			CompletionTokens: 6,
+			TotalTokens:      10,
+		},
+	}
+
+	if s := response.String(); s != expected {
+		t.Errorf("expected %v, got %v", expected, s)
+	}
+}
+
+func TestResponse_Info(t *testing.T) {
+	response := Response{
+		ID:      "test",
+		Object:  "chat.completion",
+		Created: 1677652288,
+		Choices: []Choice{{Message: Message{Content: "This is a message", Role: RoleAssistant}, FinishReason: "stop"}},
+		Usage: Usage{
+			PromptTokens:     4,
+			CompletionTokens: 6,
+			TotalTokens:      10,
+		},
+	}
+
+	expected := "prompt tokens: 4, completion tokens: 6, total tokens: 10"
+
+	if s := response.Info(); s != expected {
+		t.Errorf("expected %v, got %v", expected, s)
 	}
 }

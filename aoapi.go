@@ -11,8 +11,13 @@ import (
 	"time"
 )
 
-// RequiredParamError is an error that occurs when a required parameter is missing.
-var RequiredParamError = fmt.Errorf("required parameter is missing")
+var (
+	// RequiredParamError is an error that occurs when a required parameter is missing.
+	RequiredParamError = fmt.Errorf("required parameter is missing")
+
+	// ResponseError is an error that occurs when the response is empty.
+	ResponseError = fmt.Errorf("failed response")
+)
 
 // Role is a type of user message role.
 type Role string
@@ -54,16 +59,6 @@ type Usage struct {
 	PromptTokens     uint `json:"prompt_tokens"`
 	CompletionTokens uint `json:"completion_tokens"`
 	TotalTokens      uint `json:"total_tokens"`
-}
-
-// Response is a struct of response.
-type Response struct {
-	ID        string    `json:"id"`
-	Object    string    `json:"object"`
-	Created   int64     `json:"created"`
-	Choices   []Choice  `json:"choices"`
-	Usage     Usage     `json:"usage"`
-	CreatedTs time.Time `json:"-"`
 }
 
 // Request is a struct of request.
@@ -117,13 +112,39 @@ func (r *Request) build(ctx context.Context, uri, bearer string) (*http.Request,
 	return req, nil
 }
 
+// Response is a struct of response.
+type Response struct {
+	ID        string    `json:"id"`
+	Object    string    `json:"object"`
+	Created   int64     `json:"created"`
+	Choices   []Choice  `json:"choices"`
+	Usage     Usage     `json:"usage"`
+	CreatedTs time.Time `json:"-"`
+}
+
 func (response *Response) build(resp *http.Response) error {
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return fmt.Errorf("failed to unmarshal response: %w", err)
 	}
 
+	if len(response.Choices) == 0 {
+		return errors.Join(ResponseError, fmt.Errorf("empty response"))
+	}
+
 	response.CreatedTs = time.Unix(response.Created, 0)
 	return nil
+}
+
+// String returns the first message of the response.
+func (response *Response) String() string {
+	return response.Choices[0].Message.Content
+}
+
+// Info returns API tokens usage information.
+func (response *Response) Info() string {
+	return fmt.Sprintf("prompt tokens: %d, completion tokens: %d, total tokens: %d",
+		response.Usage.PromptTokens, response.Usage.CompletionTokens, response.Usage.TotalTokens,
+	)
 }
 
 // Completion sends a request to the API and returns a response.
@@ -141,6 +162,10 @@ func Completion(ctx context.Context, client *http.Client, r *Request, uri, beare
 	defer func() {
 		_ = resp.Body.Close()
 	}()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.Join(ResponseError, fmt.Errorf("status code %d", resp.StatusCode))
+	}
 
 	response := &Response{}
 	if err = response.build(resp); err != nil {
