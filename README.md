@@ -23,7 +23,7 @@ request := &aoapi.Request{
     Messages: []aoapi.Message{
         {
             Role:    aoapi.RoleSystem,
-            Content: "You are translator from english to German. " +
+            Content: "You are translator from English to German. " +
                 "Translate the following sentences.",
         },
         {
