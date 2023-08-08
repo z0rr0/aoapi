@@ -12,11 +12,11 @@ import (
 )
 
 var (
-	// RequiredParamError is an error that occurs when a required parameter is missing.
-	RequiredParamError = fmt.Errorf("required parameter is missing")
+	// ErrRequiredParam is an error that occurs when a required parameter is missing.
+	ErrRequiredParam = fmt.Errorf("required parameter is missing")
 
-	// ResponseError is an error that occurs when the response is empty.
-	ResponseError = fmt.Errorf("failed response")
+	// ErrResponse is an error that occurs when the response is empty.
+	ErrResponse = fmt.Errorf("failed response")
 )
 
 // Role is a type of user message role.
@@ -80,11 +80,11 @@ type Request struct {
 
 func (r *Request) marshal() (io.Reader, error) {
 	if r.Model == "" {
-		return nil, errors.Join(RequiredParamError, fmt.Errorf("model must not be empty"))
+		return nil, errors.Join(ErrRequiredParam, fmt.Errorf("model must not be empty"))
 	}
 
 	if len(r.Messages) == 0 {
-		return nil, errors.Join(RequiredParamError, fmt.Errorf("messages must not be empty"))
+		return nil, errors.Join(ErrRequiredParam, fmt.Errorf("messages must not be empty"))
 	}
 
 	data, err := json.Marshal(r)
@@ -128,7 +128,7 @@ func (response *Response) build(resp *http.Response) error {
 	}
 
 	if len(response.Choices) == 0 {
-		return errors.Join(ResponseError, fmt.Errorf("empty response"))
+		return errors.Join(ErrResponse, fmt.Errorf("empty response"))
 	}
 
 	response.CreatedTs = time.Unix(response.Created, 0)
@@ -137,11 +137,15 @@ func (response *Response) build(resp *http.Response) error {
 
 // String returns the first message of the response.
 func (response *Response) String() string {
+	if len(response.Choices) == 0 {
+		return ""
+	}
+
 	return response.Choices[0].Message.Content
 }
 
-// Info returns API tokens usage information.
-func (response *Response) Info() string {
+// UsageInfo returns API tokens usage information.
+func (response *Response) UsageInfo() string {
 	return fmt.Sprintf("prompt tokens: %d, completion tokens: %d, total tokens: %d",
 		response.Usage.PromptTokens, response.Usage.CompletionTokens, response.Usage.TotalTokens,
 	)
@@ -164,7 +168,7 @@ func Completion(ctx context.Context, client *http.Client, r *Request, uri, beare
 	}()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.Join(ResponseError, fmt.Errorf("status code %d", resp.StatusCode))
+		return nil, errors.Join(ErrResponse, fmt.Errorf("status code %d", resp.StatusCode))
 	}
 
 	response := &Response{}

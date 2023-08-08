@@ -60,19 +60,19 @@ func TestRequestMarshal(t *testing.T) {
 		{
 			name:      "empty request",
 			request:   Request{},
-			err:       RequiredParamError,
+			err:       ErrRequiredParam,
 			errString: "required parameter is missing\nmodel must not be empty",
 		},
 		{
 			name:      "empty messages",
 			request:   Request{Model: ModelGPT4K32},
-			err:       RequiredParamError,
+			err:       ErrRequiredParam,
 			errString: "required parameter is missing\nmessages must not be empty",
 		},
 		{
 			name:      "empty model",
 			request:   Request{Messages: []Message{{Role: RoleSystem, Content: "Hello, world!"}}},
-			err:       RequiredParamError,
+			err:       ErrRequiredParam,
 			errString: "required parameter is missing\nmodel must not be empty",
 		},
 		{
@@ -296,8 +296,8 @@ func TestCompletionFailedRequest(t *testing.T) {
 		t.Fatal("expected error")
 	}
 
-	if !errors.Is(err, RequiredParamError) {
-		t.Fatalf("expected %v, got %v", ResponseError, err)
+	if !errors.Is(err, ErrRequiredParam) {
+		t.Fatalf("expected %v, got %v", ErrResponse, err)
 	}
 }
 
@@ -370,31 +370,32 @@ func TestCompletionFailedContent(t *testing.T) {
 		t.Fatal("expected error")
 	}
 
-	if !errors.Is(err, ResponseError) {
-		t.Fatalf("expected %v, got %v", ResponseError, err)
+	if !errors.Is(err, ErrResponse) {
+		t.Fatalf("expected %v, got %v", ErrResponse, err)
 	}
 }
 
 func TestResponse_String(t *testing.T) {
-	expected := "This is a message"
+	var expected string
 	response := Response{
 		ID:      "test",
 		Object:  "chat.completion",
 		Created: 1677652288,
-		Choices: []Choice{{Message: Message{Content: expected, Role: RoleAssistant}, FinishReason: "stop"}},
-		Usage: Usage{
-			PromptTokens:     4,
-			CompletionTokens: 6,
-			TotalTokens:      10,
-		},
 	}
+
+	if s := response.String(); s != expected {
+		t.Errorf("expected %v, got %v", expected, s)
+	}
+
+	expected = "This is a message"
+	response.Choices = []Choice{{Message: Message{Content: expected, Role: RoleAssistant}, FinishReason: "stop"}}
 
 	if s := response.String(); s != expected {
 		t.Errorf("expected %v, got %v", expected, s)
 	}
 }
 
-func TestResponse_Info(t *testing.T) {
+func TestResponse_UsageInfo(t *testing.T) {
 	response := Response{
 		ID:      "test",
 		Object:  "chat.completion",
@@ -409,7 +410,7 @@ func TestResponse_Info(t *testing.T) {
 
 	expected := "prompt tokens: 4, completion tokens: 6, total tokens: 10"
 
-	if s := response.Info(); s != expected {
+	if s := response.UsageInfo(); s != expected {
 		t.Errorf("expected %v, got %v", expected, s)
 	}
 }
