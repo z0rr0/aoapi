@@ -33,7 +33,7 @@ func ExampleCompletion() {
 	// test ChatGPT server, for production use: "https://api.openai.com/v1/chat/completions"
 	server := gptServer()
 	defer server.Close()
-	auth := aoapi.Auth{Bearer: key, URL: server.URL}
+	params := aoapi.Params{Bearer: key, URL: server.URL, StopMarker: "..."}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -55,7 +55,7 @@ func ExampleCompletion() {
 		Temperature: &temperature,
 	}
 
-	resp, err := aoapi.Completion(ctx, client, request, auth)
+	resp, err := aoapi.Completion(ctx, client, request, params)
 	if err != nil {
 		panic(err) // or handle error
 	}

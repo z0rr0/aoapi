@@ -106,7 +106,7 @@ func (r *Request) marshal() (io.Reader, error) {
 	return bytes.NewReader(data), nil
 }
 
-func (r *Request) build(ctx context.Context, auth *Auth) (*http.Request, error) {
+func (r *Request) build(ctx context.Context, auth *Params) (*http.Request, error) {
 	body, err := r.marshal()
 	if err != nil {
 		return nil, err
@@ -129,12 +129,13 @@ func (r *Request) build(ctx context.Context, auth *Auth) (*http.Request, error) 
 
 // Response is a struct of response.
 type Response struct {
-	ID        string    `json:"id"`
-	Object    string    `json:"object"`
-	Created   int64     `json:"created"`
-	Choices   []Choice  `json:"choices"`
-	Usage     Usage     `json:"usage"`
-	CreatedTs time.Time `json:"-"`
+	ID         string    `json:"id"`
+	Object     string    `json:"object"`
+	Created    int64     `json:"created"`
+	Choices    []Choice  `json:"choices"`
+	Usage      Usage     `json:"usage"`
+	CreatedTs  time.Time `json:"-"`
+	stopMarker string
 }
 
 func (response *Response) build(resp *http.Response) error {
@@ -152,17 +153,20 @@ func (response *Response) build(resp *http.Response) error {
 
 // String returns the first message of the response.
 func (response *Response) String() string {
-	const reasonMarker = " [reason=length]"
-	var b strings.Builder
+	var (
+		builder   strings.Builder
+		hasMarker = response.stopMarker != ""
+	)
 
 	for i := range response.Choices {
-		b.WriteString(response.Choices[i].Message.Content)
+		builder.WriteString(response.Choices[i].Message.Content)
 
-		if response.Choices[i].FinishReason == FinishReasonLength {
-			b.WriteString(reasonMarker)
+		if hasMarker && (response.Choices[i].FinishReason == FinishReasonLength) {
+			builder.WriteString(response.stopMarker)
 		}
 	}
-	return b.String()
+
+	return builder.String()
 }
 
 // UsageInfo returns API tokens usage information.
@@ -172,16 +176,17 @@ func (response *Response) UsageInfo() string {
 	)
 }
 
-// Auth is a struct of API authentication information.
-type Auth struct {
+// Params is a struct of API authentication and additional parameters.
+type Params struct {
 	Bearer       string
 	Organization string
 	URL          string
+	StopMarker   string
 }
 
 // Completion sends a request to the API and returns a response.
-func Completion(ctx context.Context, client *http.Client, r *Request, auth Auth) (*Response, error) {
-	request, err := r.build(ctx, &auth)
+func Completion(ctx context.Context, client *http.Client, r *Request, p Params) (*Response, error) {
+	request, err := r.build(ctx, &p)
 	if err != nil {
 		return nil, err
 	}
@@ -199,7 +204,7 @@ func Completion(ctx context.Context, client *http.Client, r *Request, auth Auth)
 		return nil, errors.Join(ErrResponse, fmt.Errorf("status code %d", resp.StatusCode))
 	}
 
-	response := &Response{}
+	response := &Response{stopMarker: p.StopMarker}
 	if err = response.build(resp); err != nil {
 		return nil, err
 	}

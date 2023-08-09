@@ -253,8 +253,8 @@ func TestCompletion(t *testing.T) {
 		MaxTokens: 100,
 	}
 
-	auth := Auth{Bearer: "test", URL: s.URL, Organization: "test-org"}
-	response, err := Completion(context.Background(), client, request, auth)
+	params := Params{Bearer: "test", URL: s.URL, Organization: "test-org"}
+	response, err := Completion(context.Background(), client, request, params)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -292,7 +292,7 @@ func TestCompletionFailedStatus(t *testing.T) {
 		},
 		MaxTokens: 100,
 	}
-	_, err := Completion(context.Background(), client, request, Auth{Bearer: "test", URL: s.URL})
+	_, err := Completion(context.Background(), client, request, Params{Bearer: "test", URL: s.URL})
 
 	if err == nil {
 		t.Fatal("expected error")
@@ -302,7 +302,7 @@ func TestCompletionFailedStatus(t *testing.T) {
 func TestCompletionFailedRequest(t *testing.T) {
 	client := http.DefaultClient
 	request := &Request{Model: ModelGPT35Turbo} // no messages
-	_, err := Completion(context.Background(), client, request, Auth{Bearer: "test", URL: ":"})
+	_, err := Completion(context.Background(), client, request, Params{Bearer: "test", URL: ":"})
 
 	if err == nil {
 		t.Fatal("expected error")
@@ -332,7 +332,7 @@ func TestCompletionFailedJSON(t *testing.T) {
 		},
 		MaxTokens: 100,
 	}
-	_, err := Completion(context.Background(), client, request, Auth{Bearer: "test", URL: s.URL})
+	_, err := Completion(context.Background(), client, request, Params{Bearer: "test", URL: s.URL})
 
 	if err == nil {
 		t.Fatal("expected error")
@@ -349,7 +349,7 @@ func TestCompletionFailedURL(t *testing.T) {
 		},
 		MaxTokens: 100,
 	}
-	_, err := Completion(context.Background(), client, request, Auth{Bearer: "test", URL: "http://127.0.0.1:99999"})
+	_, err := Completion(context.Background(), client, request, Params{Bearer: "test", URL: "http://127.0.0.1:99999"})
 
 	if err == nil {
 		t.Fatal("expected error")
@@ -376,7 +376,7 @@ func TestCompletionFailedContent(t *testing.T) {
 		},
 		MaxTokens: 100,
 	}
-	_, err := Completion(context.Background(), client, request, Auth{Bearer: "test", URL: s.URL})
+	_, err := Completion(context.Background(), client, request, Params{Bearer: "test", URL: s.URL})
 
 	if err == nil {
 		t.Fatal("expected error")
@@ -435,6 +435,7 @@ func TestResponse_String(t *testing.T) {
 						FinishReason: FinishReasonLength,
 					},
 				},
+				stopMarker: " [reason=length]",
 			},
 			expected: "This is a message. [reason=length]",
 		},
