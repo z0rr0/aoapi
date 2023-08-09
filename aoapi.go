@@ -106,7 +106,7 @@ func (r *Request) marshal() (io.Reader, error) {
 	return bytes.NewReader(data), nil
 }
 
-func (r *Request) build(ctx context.Context, auth Auth) (*http.Request, error) {
+func (r *Request) build(ctx context.Context, auth *Auth) (*http.Request, error) {
 	body, err := r.marshal()
 	if err != nil {
 		return nil, err
@@ -181,7 +181,7 @@ type Auth struct {
 
 // Completion sends a request to the API and returns a response.
 func Completion(ctx context.Context, client *http.Client, r *Request, auth Auth) (*Response, error) {
-	request, err := r.build(ctx, auth)
+	request, err := r.build(ctx, &auth)
 	if err != nil {
 		return nil, err
 	}
