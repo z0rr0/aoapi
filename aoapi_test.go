@@ -222,6 +222,16 @@ func TestRequestMarshal(t *testing.T) {
 
 func TestCompletion(t *testing.T) {
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if ct := r.Header.Get("Content-Type"); ct != "application/json" {
+			t.Errorf("failed content type header: %q", ct)
+		}
+		if auth := r.Header.Get("Authorization"); auth != "Bearer test" {
+			t.Errorf("failed authorization header: %q", auth)
+		}
+		if org := r.Header.Get("OpenAI-Organization"); org != "test-org" {
+			t.Errorf("failed organization header: %q", org)
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		response := `{"id":"test","object":"chat.completion","created":1677652288,` +
 			`"choices":[{"index":0,"message":{"content":"Message","role":"assistant"},"finish_reason":"stop"}],` +
@@ -242,7 +252,9 @@ func TestCompletion(t *testing.T) {
 		},
 		MaxTokens: 100,
 	}
-	response, err := Completion(context.Background(), client, request, Auth{Bearer: "test", URL: s.URL})
+
+	auth := Auth{Bearer: "test", URL: s.URL, Organization: "test-org"}
+	response, err := Completion(context.Background(), client, request, auth)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
