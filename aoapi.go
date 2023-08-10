@@ -201,7 +201,18 @@ func Completion(ctx context.Context, client *http.Client, r *Request, p Params) 
 	}()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.Join(ErrResponse, fmt.Errorf("status code %d", resp.StatusCode))
+		data, e := io.ReadAll(resp.Body)
+
+		if e != nil {
+			err = errors.Join(
+				ErrResponse,
+				fmt.Errorf("status code %d", resp.StatusCode),
+				fmt.Errorf("failed read response: %w", e),
+			)
+			return nil, err
+		}
+
+		return nil, errors.Join(ErrResponse, fmt.Errorf("status code %d: %s", resp.StatusCode, string(data)))
 	}
 
 	response := &Response{stopMarker: p.StopMarker}
