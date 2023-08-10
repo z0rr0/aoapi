@@ -279,7 +279,7 @@ func TestCompletion(t *testing.T) {
 
 func TestCompletionFailedStatus(t *testing.T) {
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusBadRequest)
+		http.Error(w, "test", http.StatusBadGateway)
 	}))
 	defer s.Close()
 
@@ -296,6 +296,48 @@ func TestCompletionFailedStatus(t *testing.T) {
 
 	if err == nil {
 		t.Fatal("expected error")
+	}
+}
+
+func TestCompletionFailedWithError(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+
+		response := `{"error":{"message":"This model's maximum context length is 4097 tokens.",` +
+			`"type": "invalid_request_error","param": "messages","code": "context_length_exceeded"}}`
+
+		if _, err := fmt.Fprint(w, response); err != nil {
+			t.Error(err)
+		}
+	}))
+	defer s.Close()
+
+	client := s.Client()
+	request := &Request{
+		Model: ModelGPT35Turbo,
+		Messages: []Message{
+			{Role: RoleSystem, Content: "This is a system message"},
+			{Role: RoleUser, Content: "This is a user message"},
+		},
+		MaxTokens: 100,
+	}
+	_, err := Completion(context.Background(), client, request, Params{Bearer: "test", URL: s.URL})
+
+	if err == nil {
+		t.Fatal("expected error")
+	}
+
+	if !errors.Is(err, ErrResponse) {
+		t.Fatalf("expected %v, got %v", ErrResponse, err)
+	}
+
+	expected := "failed response\nstatus code 400\n"
+	expected += `type="invalid_request_error", param="messages", code="context_length_exceeded": `
+	expected += `This model's maximum context length is 4097 tokens.`
+
+	if e := err.Error(); e != expected {
+		t.Fatalf("expected %q, got %q", expected, e)
 	}
 }
 

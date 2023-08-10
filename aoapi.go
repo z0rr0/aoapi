@@ -176,6 +176,35 @@ func (response *Response) UsageInfo() string {
 	)
 }
 
+// ErrorInfo is a struct of error information.
+type ErrorInfo struct {
+	Message string `json:"message"`
+	Type    string `json:"type"`
+	Param   string `json:"param"`
+	Code    string `json:"code"`
+}
+
+// ResponseError is a struct of response error.
+type ResponseError struct {
+	E ErrorInfo `json:"error"`
+}
+
+// Error returns the error message.
+func (respErr *ResponseError) Error() string {
+	return fmt.Sprintf("type=%q, param=%q, code=%q: %s", respErr.E.Type, respErr.E.Param, respErr.E.Code, respErr.E.Message)
+}
+
+// build builds the error from the response. It always returns an error.
+func (respErr *ResponseError) build(reader io.Reader, statusCode int) error {
+	err := errors.Join(ErrResponse, fmt.Errorf("status code %d", statusCode))
+
+	if e := json.NewDecoder(reader).Decode(respErr); e != nil {
+		return errors.Join(err, fmt.Errorf("failed unmarshal error: %w", e))
+	}
+
+	return errors.Join(err, respErr)
+}
+
 // Params is a struct of API authentication and additional parameters.
 type Params struct {
 	Bearer       string
@@ -201,18 +230,8 @@ func Completion(ctx context.Context, client *http.Client, r *Request, p Params) 
 	}()
 
 	if resp.StatusCode != http.StatusOK {
-		data, e := io.ReadAll(resp.Body)
-
-		if e != nil {
-			err = errors.Join(
-				ErrResponse,
-				fmt.Errorf("status code %d", resp.StatusCode),
-				fmt.Errorf("failed read response: %w", e),
-			)
-			return nil, err
-		}
-
-		return nil, errors.Join(ErrResponse, fmt.Errorf("status code %d: %s", resp.StatusCode, string(data)))
+		respErr := &ResponseError{}
+		return nil, respErr.build(resp.Body, resp.StatusCode)
 	}
 
 	response := &Response{stopMarker: p.StopMarker}
