@@ -38,7 +38,7 @@ params := aoapi.Params{
 	Bearer: os.Getenv("OPENAI_API_KEY"),
 	Organization: os.Getenv("OPENAI_ORGANIZATION"),
 	URL: "https://api.openai.com/v1/chat/completions",
-    StopMarker: "...",
+	StopMarker: "...",
 }
 
 resp, err := aoapi.Completion(ctx, client, request, params)
