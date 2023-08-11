@@ -111,7 +111,7 @@ func TestImageResponse_String(t *testing.T) {
 
 func TestImageFailedRequest(t *testing.T) {
 	client := http.DefaultClient
-	request := &ImageRequest{N: 2} // no messages
+	request := &ImageRequest{N: 2, Size: ImageSize256} // no messages
 	_, err := Image(context.Background(), client, request, Params{Bearer: "test", URL: ":"})
 
 	if err == nil {
@@ -149,7 +149,7 @@ func TestImageFailedJSON(t *testing.T) {
 	defer s.Close()
 
 	client := s.Client()
-	request := &ImageRequest{Prompt: "test"}
+	request := &ImageRequest{Prompt: "test", Size: ImageSize512}
 	_, err := Image(context.Background(), client, request, Params{Bearer: "test", URL: s.URL})
 
 	if err == nil {
@@ -173,7 +173,7 @@ func TestImageFailedData(t *testing.T) {
 	defer s.Close()
 
 	client := s.Client()
-	request := &ImageRequest{Prompt: "test"}
+	request := &ImageRequest{Prompt: "test", Size: ImageSize1024}
 	_, err := Image(context.Background(), client, request, Params{Bearer: "test", URL: s.URL})
 
 	if err == nil {
