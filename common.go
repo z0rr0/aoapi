@@ -56,7 +56,7 @@ type CommonRequest interface {
 }
 
 // commonRequest sends a request to the API and returns a body response.
-// A caller must close the response body.
+// A caller must close the response body if no error.
 func commonRequest(ctx context.Context, client *http.Client, cReq CommonRequest, p Params) (io.ReadCloser, error) {
 	request, err := cReq.build(ctx, &p)
 	if err != nil {
@@ -70,7 +70,7 @@ func commonRequest(ctx context.Context, client *http.Client, cReq CommonRequest,
 
 	if resp.StatusCode != http.StatusOK {
 		respErr := &ResponseError{}
-		// build closes the response body
+		// respErr.build closes the response body
 		return nil, respErr.build(resp.Body, resp.StatusCode)
 	}
 
