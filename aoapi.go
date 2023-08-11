@@ -72,8 +72,8 @@ type Usage struct {
 	TotalTokens      uint `json:"total_tokens"`
 }
 
-// Request is a struct of request.
-type Request struct {
+// CompletionRequest is a struct of request.
+type CompletionRequest struct {
 	Model    Model     `json:"model"`
 	Messages []Message `json:"messages"`
 	// optional
@@ -89,16 +89,16 @@ type Request struct {
 	LogitBias        *map[string]float32 `json:"logit_bias,omitempty"`
 }
 
-func (r *Request) marshal() (io.Reader, error) {
-	if r.Model == "" {
+func (c *CompletionRequest) marshal() (io.Reader, error) {
+	if c.Model == "" {
 		return nil, errors.Join(ErrRequiredParam, fmt.Errorf("model must not be empty"))
 	}
 
-	if len(r.Messages) == 0 {
+	if len(c.Messages) == 0 {
 		return nil, errors.Join(ErrRequiredParam, fmt.Errorf("messages must not be empty"))
 	}
 
-	data, err := json.Marshal(r)
+	data, err := json.Marshal(c)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
@@ -106,8 +106,8 @@ func (r *Request) marshal() (io.Reader, error) {
 	return bytes.NewReader(data), nil
 }
 
-func (r *Request) build(ctx context.Context, auth *Params) (*http.Request, error) {
-	body, err := r.marshal()
+func (c *CompletionRequest) build(ctx context.Context, auth *Params) (*http.Request, error) {
+	body, err := c.marshal()
 	if err != nil {
 		return nil, err
 	}
@@ -127,8 +127,8 @@ func (r *Request) build(ctx context.Context, auth *Params) (*http.Request, error
 	return req, nil
 }
 
-// Response is a struct of response.
-type Response struct {
+// CompletionResponse is a struct of response.
+type CompletionResponse struct {
 	ID         string    `json:"id"`
 	Object     string    `json:"object"`
 	Created    int64     `json:"created"`
@@ -138,31 +138,31 @@ type Response struct {
 	stopMarker string
 }
 
-func (response *Response) build(resp *http.Response) error {
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+func (r *CompletionResponse) build(body io.Reader) error {
+	if err := json.NewDecoder(body).Decode(&r); err != nil {
 		return fmt.Errorf("failed to unmarshal response: %w", err)
 	}
 
-	if len(response.Choices) == 0 {
+	if len(r.Choices) == 0 {
 		return errors.Join(ErrResponse, fmt.Errorf("empty response"))
 	}
 
-	response.CreatedTs = time.Unix(response.Created, 0)
+	r.CreatedTs = time.Unix(r.Created, 0)
 	return nil
 }
 
 // String returns the first message of the response.
-func (response *Response) String() string {
+func (r *CompletionResponse) String() string {
 	var (
 		builder   strings.Builder
-		hasMarker = response.stopMarker != ""
+		hasMarker = r.stopMarker != ""
 	)
 
-	for i := range response.Choices {
-		builder.WriteString(response.Choices[i].Message.Content)
+	for i := range r.Choices {
+		builder.WriteString(r.Choices[i].Message.Content)
 
-		if hasMarker && (response.Choices[i].FinishReason == FinishReasonLength) {
-			builder.WriteString(response.stopMarker)
+		if hasMarker && (r.Choices[i].FinishReason == FinishReasonLength) {
+			builder.WriteString(r.stopMarker)
 		}
 	}
 
@@ -170,72 +170,25 @@ func (response *Response) String() string {
 }
 
 // UsageInfo returns API tokens usage information.
-func (response *Response) UsageInfo() string {
+func (r *CompletionResponse) UsageInfo() string {
 	return fmt.Sprintf("prompt tokens: %d, completion tokens: %d, total tokens: %d",
-		response.Usage.PromptTokens, response.Usage.CompletionTokens, response.Usage.TotalTokens,
+		r.Usage.PromptTokens, r.Usage.CompletionTokens, r.Usage.TotalTokens,
 	)
 }
 
-// ErrorInfo is a struct of error information.
-type ErrorInfo struct {
-	Message string `json:"message"`
-	Type    string `json:"type"`
-	Param   string `json:"param"`
-	Code    string `json:"code"`
-}
-
-// ResponseError is a struct of response error.
-type ResponseError struct {
-	E ErrorInfo `json:"error"`
-}
-
-// Error returns the error message.
-func (respErr *ResponseError) Error() string {
-	return fmt.Sprintf("type=%q, param=%q, code=%q: %s", respErr.E.Type, respErr.E.Param, respErr.E.Code, respErr.E.Message)
-}
-
-// build builds the error from the response. It always returns an error.
-func (respErr *ResponseError) build(reader io.Reader, statusCode int) error {
-	err := errors.Join(ErrResponse, fmt.Errorf("status code %d", statusCode))
-
-	if e := json.NewDecoder(reader).Decode(respErr); e != nil {
-		return errors.Join(err, fmt.Errorf("failed unmarshal error: %w", e))
-	}
-
-	return errors.Join(err, respErr)
-}
-
-// Params is a struct of API authentication and additional parameters.
-type Params struct {
-	Bearer       string
-	Organization string
-	URL          string
-	StopMarker   string
-}
-
 // Completion sends a request to the API and returns a response.
-func Completion(ctx context.Context, client *http.Client, r *Request, p Params) (*Response, error) {
-	request, err := r.build(ctx, &p)
+func Completion(ctx context.Context, client *http.Client, r *CompletionRequest, p Params) (*CompletionResponse, error) {
+	body, err := commonRequest(ctx, client, r, p)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := client.Do(request)
-	if err != nil {
-		return nil, fmt.Errorf("failed to send request: %w", err)
-	}
-
 	defer func() {
-		_ = resp.Body.Close()
+		_ = body.Close()
 	}()
 
-	if resp.StatusCode != http.StatusOK {
-		respErr := &ResponseError{}
-		return nil, respErr.build(resp.Body, resp.StatusCode)
-	}
-
-	response := &Response{stopMarker: p.StopMarker}
-	if err = response.build(resp); err != nil {
+	response := &CompletionResponse{stopMarker: p.StopMarker}
+	if err = response.build(body); err != nil {
 		return nil, err
 	}
 

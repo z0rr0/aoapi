@@ -39,7 +39,7 @@ func ExampleCompletion() {
 	defer cancel()
 
 	client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment}}
-	request := &aoapi.Request{
+	request := &aoapi.CompletionRequest{
 		Model: aoapi.ModelGPT35Turbo,
 		Messages: []aoapi.Message{
 			{

@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func compareResponses(a, b Response) bool {
+func compareResponses(a, b CompletionResponse) bool {
 	if a.ID != b.ID {
 		return false
 	}
@@ -51,7 +51,7 @@ func TestRequestMarshal(t *testing.T) {
 
 	testCases := []struct {
 		name      string
-		request   Request
+		request   CompletionRequest
 		err       error
 		errString string
 		expected  []string
@@ -59,25 +59,25 @@ func TestRequestMarshal(t *testing.T) {
 	}{
 		{
 			name:      "empty request",
-			request:   Request{},
+			request:   CompletionRequest{},
 			err:       ErrRequiredParam,
 			errString: "required parameter is missing\nmodel must not be empty",
 		},
 		{
 			name:      "empty messages",
-			request:   Request{Model: ModelGPT4K32},
+			request:   CompletionRequest{Model: ModelGPT4K32},
 			err:       ErrRequiredParam,
 			errString: "required parameter is missing\nmessages must not be empty",
 		},
 		{
 			name:      "empty model",
-			request:   Request{Messages: []Message{{Role: RoleSystem, Content: "Hello, world!"}}},
+			request:   CompletionRequest{Messages: []Message{{Role: RoleSystem, Content: "Hello, world!"}}},
 			err:       ErrRequiredParam,
 			errString: "required parameter is missing\nmodel must not be empty",
 		},
 		{
 			name: "valid request",
-			request: Request{
+			request: CompletionRequest{
 				Model: ModelGPT35Turbo,
 				Messages: []Message{
 					{Role: RoleSystem, Content: "This is a system message"},
@@ -96,7 +96,7 @@ func TestRequestMarshal(t *testing.T) {
 		},
 		{
 			name: "with name",
-			request: Request{
+			request: CompletionRequest{
 				Model: ModelGPT35TurboK16,
 				Messages: []Message{
 					{Role: RoleAssistant, Content: "This is an assistant message", Name: "assistant"},
@@ -113,7 +113,7 @@ func TestRequestMarshal(t *testing.T) {
 		},
 		{
 			name: "with optional",
-			request: Request{
+			request: CompletionRequest{
 				Model: ModelGPT4,
 				Messages: []Message{
 					{Role: RoleSystem, Content: "This is a system message"},
@@ -153,7 +153,7 @@ func TestRequestMarshal(t *testing.T) {
 		},
 		{
 			name: "partial optional",
-			request: Request{
+			request: CompletionRequest{
 				Model: ModelGPT35Turbo,
 				Messages: []Message{
 					{Role: RoleSystem, Content: "This is a system message"},
@@ -244,7 +244,7 @@ func TestCompletion(t *testing.T) {
 	defer s.Close()
 
 	client := s.Client()
-	request := &Request{
+	request := &CompletionRequest{
 		Model: ModelGPT35Turbo,
 		Messages: []Message{
 			{Role: RoleSystem, Content: "This is a system message"},
@@ -260,7 +260,7 @@ func TestCompletion(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	expected := Response{
+	expected := CompletionResponse{
 		ID:      "test",
 		Object:  "chat.completion",
 		Created: 1677652288,
@@ -284,7 +284,7 @@ func TestCompletionFailedStatus(t *testing.T) {
 	defer s.Close()
 
 	client := s.Client()
-	request := &Request{
+	request := &CompletionRequest{
 		Model: ModelGPT35Turbo,
 		Messages: []Message{
 			{Role: RoleSystem, Content: "This is a system message"},
@@ -314,7 +314,7 @@ func TestCompletionFailedWithError(t *testing.T) {
 	defer s.Close()
 
 	client := s.Client()
-	request := &Request{
+	request := &CompletionRequest{
 		Model: ModelGPT35Turbo,
 		Messages: []Message{
 			{Role: RoleSystem, Content: "This is a system message"},
@@ -343,7 +343,7 @@ func TestCompletionFailedWithError(t *testing.T) {
 
 func TestCompletionFailedRequest(t *testing.T) {
 	client := http.DefaultClient
-	request := &Request{Model: ModelGPT35Turbo} // no messages
+	request := &CompletionRequest{Model: ModelGPT35Turbo} // no messages
 	_, err := Completion(context.Background(), client, request, Params{Bearer: "test", URL: ":"})
 
 	if err == nil {
@@ -366,7 +366,7 @@ func TestCompletionFailedJSON(t *testing.T) {
 	defer s.Close()
 
 	client := s.Client()
-	request := &Request{
+	request := &CompletionRequest{
 		Model: ModelGPT35Turbo,
 		Messages: []Message{
 			{Role: RoleSystem, Content: "This is a system message"},
@@ -383,7 +383,7 @@ func TestCompletionFailedJSON(t *testing.T) {
 
 func TestCompletionFailedURL(t *testing.T) {
 	client := http.DefaultClient
-	request := &Request{
+	request := &CompletionRequest{
 		Model: ModelGPT35Turbo,
 		Messages: []Message{
 			{Role: RoleSystem, Content: "This is a system message"},
@@ -410,7 +410,7 @@ func TestCompletionFailedContent(t *testing.T) {
 	defer s.Close()
 
 	client := s.Client()
-	request := &Request{
+	request := &CompletionRequest{
 		Model: ModelGPT35Turbo,
 		Messages: []Message{
 			{Role: RoleSystem, Content: "This is a system message"},
@@ -432,12 +432,12 @@ func TestCompletionFailedContent(t *testing.T) {
 func TestResponse_String(t *testing.T) {
 	testCases := []struct {
 		name     string
-		response Response
+		response CompletionResponse
 		expected string
 	}{
 		{
 			name: "empty",
-			response: Response{
+			response: CompletionResponse{
 				ID:      "test",
 				Object:  "chat.completion",
 				Created: 1677652288,
@@ -445,7 +445,7 @@ func TestResponse_String(t *testing.T) {
 		},
 		{
 			name: "message",
-			response: Response{
+			response: CompletionResponse{
 				ID:      "test",
 				Object:  "chat.completion",
 				Created: 1677652288,
@@ -466,7 +466,7 @@ func TestResponse_String(t *testing.T) {
 		},
 		{
 			name: "length",
-			response: Response{
+			response: CompletionResponse{
 				ID:      "test",
 				Object:  "chat.completion",
 				Created: 1677652288,
@@ -494,7 +494,7 @@ func TestResponse_String(t *testing.T) {
 }
 
 func TestResponse_UsageInfo(t *testing.T) {
-	response := Response{
+	response := CompletionResponse{
 		ID:      "test",
 		Object:  "chat.completion",
 		Created: 1677652288,
