@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func compareResponses(a, b CompletionResponse) bool {
+func compareCompletionResponses(a, b CompletionResponse) bool {
 	if a.ID != b.ID {
 		return false
 	}
@@ -38,7 +38,7 @@ func compareResponses(a, b CompletionResponse) bool {
 	return true
 }
 
-func TestRequestMarshal(t *testing.T) {
+func TestCompletionRequestMarshal(t *testing.T) {
 	var (
 		temperature      float32 = 0.5
 		topP             float32 = 0.6
@@ -272,7 +272,7 @@ func TestCompletion(t *testing.T) {
 		},
 	}
 
-	if r := *response; !compareResponses(expected, r) {
+	if r := *response; !compareCompletionResponses(expected, r) {
 		t.Fatalf("expected %v, got %v", expected, r)
 	}
 }
@@ -379,6 +379,10 @@ func TestCompletionFailedJSON(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error")
 	}
+
+	if e := err.Error(); !strings.HasPrefix(e, "failed to unmarshal response") {
+		t.Fatalf("expected %q, got %q", "failed to unmarshal response", e)
+	}
 }
 
 func TestCompletionFailedURL(t *testing.T) {
@@ -429,7 +433,7 @@ func TestCompletionFailedContent(t *testing.T) {
 	}
 }
 
-func TestResponse_String(t *testing.T) {
+func TestCompletionResponse_String(t *testing.T) {
 	testCases := []struct {
 		name     string
 		response CompletionResponse
@@ -493,7 +497,7 @@ func TestResponse_String(t *testing.T) {
 	}
 }
 
-func TestResponse_UsageInfo(t *testing.T) {
+func TestCompletionResponse_UsageInfo(t *testing.T) {
 	response := CompletionResponse{
 		ID:      "test",
 		Object:  "chat.completion",
