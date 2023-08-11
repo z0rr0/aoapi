@@ -7,7 +7,7 @@
 
 Ask OpenIA API.
 
-This is a simple Go package for OpenAI chat completion API.
+This is a simple Go package for OpenAI chat completion and image generation APIs.
 
 ## Usage
 
