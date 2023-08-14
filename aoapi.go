@@ -21,36 +21,6 @@ var (
 	ErrResponse = fmt.Errorf("failed response")
 )
 
-// Role is a type of user message role.
-type Role string
-
-// User message roles.
-const (
-	RoleSystem    Role = "system"
-	RoleUser      Role = "user"
-	RoleAssistant Role = "assistant"
-)
-
-// Model is a type of AI model name.
-type Model string
-
-// AI model names.
-const (
-	ModelGPT35Turbo    Model = "gpt-3.5-turbo"
-	ModelGPT35TurboK16 Model = "gpt-3.5-turbo-16k"
-	ModelGPT4          Model = "gpt-4"
-	ModelGPT4K32       Model = "gpt-4-32k"
-)
-
-// FinishReason is a type of response finish reason.
-type FinishReason string
-
-// Finish reasons variants.
-const (
-	FinishReasonLength FinishReason = "length"
-	FinishReasonStop   FinishReason = "stop"
-)
-
 // Message is a struct of user message.
 type Message struct {
 	Role    Role   `json:"role"`
