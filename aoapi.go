@@ -15,10 +15,10 @@ import (
 
 var (
 	// ErrRequiredParam is an error that occurs when a required parameter is missing.
-	ErrRequiredParam = fmt.Errorf("required parameter is missing")
+	ErrRequiredParam = errors.New("required parameter is missing")
 
 	// ErrResponse is an error that occurs when the response is empty.
-	ErrResponse = fmt.Errorf("failed response")
+	ErrResponse = errors.New("failed response")
 )
 
 // Message is a struct of user message.

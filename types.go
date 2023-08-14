@@ -3,6 +3,15 @@ package aoapi
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+)
+
+var (
+	// ErrMarshalJSON is an error that occurs when a custom type is marshaled to JSON.
+	ErrMarshalJSON = errors.New("failed JSON marshal")
+
+	// ErrUnmarshalJSON is an error that occurs when a custom type is unmarshaled from JSON.
+	ErrUnmarshalJSON = errors.New("failed JSON unmarshal")
 )
 
 // Role is a type of user message role.
@@ -17,29 +26,12 @@ const (
 
 // MarshalJSON implements the json.Marshaler interface.
 func (r *Role) MarshalJSON() ([]byte, error) {
-	switch role := *r; role {
-	case RoleSystem, RoleUser, RoleAssistant:
-		return json.Marshal(string(role))
-	default:
-		return nil, errors.New("invalid role")
-	}
+	return marshalJSON[Role](r, RoleSystem, RoleUser, RoleAssistant)
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface.
 func (r *Role) UnmarshalJSON(b []byte) error {
-	var roleStr string
-	if err := json.Unmarshal(b, &roleStr); err != nil {
-		return err
-	}
-
-	switch role := Role(roleStr); role {
-	case RoleSystem, RoleUser, RoleAssistant:
-		*r = role
-	default:
-		return errors.New("invalid role")
-	}
-
-	return nil
+	return unMarshalJSON[Role](r, b, RoleSystem, RoleUser, RoleAssistant)
 }
 
 // Model is a type of AI model name.
@@ -55,29 +47,12 @@ const (
 
 // MarshalJSON implements the json.Marshaler interface.
 func (m *Model) MarshalJSON() ([]byte, error) {
-	switch model := *m; model {
-	case ModelGPT35Turbo, ModelGPT35TurboK16, ModelGPT4, ModelGPT4K32:
-		return json.Marshal(string(model))
-	default:
-		return nil, errors.New("invalid model")
-	}
+	return marshalJSON[Model](m, ModelGPT35Turbo, ModelGPT35TurboK16, ModelGPT4, ModelGPT4K32)
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface.
 func (m *Model) UnmarshalJSON(b []byte) error {
-	var modelStr string
-	if err := json.Unmarshal(b, &modelStr); err != nil {
-		return err
-	}
-
-	switch model := Model(modelStr); model {
-	case ModelGPT35Turbo, ModelGPT35TurboK16, ModelGPT4, ModelGPT4K32:
-		*m = model
-	default:
-		return errors.New("invalid model")
-	}
-
-	return nil
+	return unMarshalJSON[Model](m, b, ModelGPT35Turbo, ModelGPT35TurboK16, ModelGPT4, ModelGPT4K32)
 }
 
 // FinishReason is a type of response finish reason.
@@ -91,27 +66,42 @@ const (
 
 // MarshalJSON implements the json.Marshaler interface.
 func (f *FinishReason) MarshalJSON() ([]byte, error) {
-	switch reason := *f; reason {
-	case FinishReasonLength, FinishReasonStop:
-		return json.Marshal(string(reason))
-	default:
-		return nil, errors.New("invalid finish reason")
-	}
+	return marshalJSON[FinishReason](f, FinishReasonLength, FinishReasonStop)
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface.
 func (f *FinishReason) UnmarshalJSON(b []byte) error {
-	var reasonStr string
-	if err := json.Unmarshal(b, &reasonStr); err != nil {
-		return err
+	return unMarshalJSON[FinishReason](f, b, FinishReasonLength, FinishReasonStop)
+}
+
+// marshalJSON is a generic function for custom types JSON marshal.
+func marshalJSON[T Role | Model | FinishReason](t *T, values ...T) ([]byte, error) {
+	v := *t
+
+	for _, value := range values {
+		if v == value {
+			return json.Marshal(string(v))
+		}
 	}
 
-	switch reason := FinishReason(reasonStr); reason {
-	case FinishReasonLength, FinishReasonStop:
-		*f = reason
-	default:
-		return errors.New("invalid finish reason")
+	return nil, errors.Join(ErrMarshalJSON, fmt.Errorf("invalid value: %v", v))
+}
+
+// unMarshalJSON is a generic function for custom types JSON unmarshal.
+func unMarshalJSON[T Role | Model | FinishReason](t *T, b []byte, values ...T) error {
+	var str string
+	if err := json.Unmarshal(b, &str); err != nil {
+		return errors.Join(ErrUnmarshalJSON, fmt.Errorf("invalid string value: %v", str))
 	}
 
-	return nil
+	v := T(str)
+
+	for _, value := range values {
+		if v == value {
+			*t = v
+			return nil
+		}
+	}
+
+	return errors.Join(ErrUnmarshalJSON, fmt.Errorf("invalid value: %v", v))
 }
