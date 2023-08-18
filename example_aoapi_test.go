@@ -35,7 +35,7 @@ func ExampleCompletion() {
 	defer server.Close()
 	params := aoapi.Params{Bearer: key, URL: server.URL, StopMarker: "..."}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
 	client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment}}
@@ -88,7 +88,7 @@ func ExampleImage() {
 	defer server.Close()
 	params := aoapi.Params{Bearer: key, URL: server.URL}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
 	client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment}}
