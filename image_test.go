@@ -85,7 +85,7 @@ func TestImageResponse_String(t *testing.T) {
 			response: ImageResponse{
 				Data: []ImageData{{URL: "https://127.0.0.1/test1"}},
 			},
-			expected: "1: https://127.0.0.1/test1\n",
+			expected: "1. https://127.0.0.1/test1\n",
 		},
 		{
 			name: "two",
@@ -95,7 +95,7 @@ func TestImageResponse_String(t *testing.T) {
 					{URL: "https://127.0.0.1/test2"},
 				},
 			},
-			expected: "1: https://127.0.0.1/test1\n2: https://127.0.0.1/test2\n",
+			expected: "1. https://127.0.0.1/test1\n2. https://127.0.0.1/test2\n",
 		},
 	}
 

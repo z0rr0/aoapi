@@ -11,7 +11,7 @@ import (
 	"github.com/z0rr0/aoapi"
 )
 
-func gptServer() *httptest.Server {
+func gptCompletionServer() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		response := `{"id":"test","object":"chat.completion","created":1677652288,` +
@@ -31,7 +31,7 @@ func ExampleCompletion() {
 	)
 
 	// test ChatGPT server, for production use: "https://api.openai.com/v1/chat/completions"
-	server := gptServer()
+	server := gptCompletionServer()
 	defer server.Close()
 	params := aoapi.Params{Bearer: key, URL: server.URL, StopMarker: "..."}
 
@@ -66,4 +66,44 @@ func ExampleCompletion() {
 	// Output:
 	// Hallo, wie geht es dir? Was machst du?
 	// Usage: prompt tokens: 35, completion tokens: 13, total tokens: 48
+}
+
+func gptImageServer() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{"id":"test","created":1677652288,` +
+			`"data":[{"url":"https://127.0.0.1/test1"},{"url":"https://127.0.0.1/test2"}]}`
+
+		if _, err := fmt.Fprint(w, response); err != nil {
+			panic(err)
+		}
+	}))
+}
+
+func ExampleImage() {
+	var key = os.Getenv("OPENAI_API_KEY")
+
+	// test ChatGPT server, for production use: "https://api.openai.com/v1/images/generations"
+	server := gptImageServer()
+	defer server.Close()
+	params := aoapi.Params{Bearer: key, URL: server.URL}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment}}
+	request := &aoapi.ImageRequest{Prompt: "image description", N: 2, Size: aoapi.ImageSize512}
+
+	resp, err := aoapi.Image(ctx, client, request, params)
+	if err != nil {
+		panic(err) // or handle error
+	}
+
+	for _, d := range resp.Data {
+		fmt.Println(d.URL)
+	}
+
+	// Output:
+	// https://127.0.0.1/test1
+	// https://127.0.0.1/test2
 }

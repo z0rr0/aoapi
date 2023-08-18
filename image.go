@@ -93,7 +93,7 @@ func (ir *ImageResponse) String() string {
 	var buf bytes.Buffer
 
 	for i, d := range ir.Data {
-		buf.WriteString(fmt.Sprintf("%d: ", i+1))
+		buf.WriteString(fmt.Sprintf("%d. ", i+1))
 		buf.WriteString(d.URL)
 		buf.WriteString(sep)
 	}
