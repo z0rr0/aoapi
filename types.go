@@ -39,20 +39,21 @@ type Model string
 
 // AI model names.
 const (
-	ModelGPT35Turbo    Model = "gpt-3.5-turbo"
-	ModelGPT35TurboK16 Model = "gpt-3.5-turbo-16k"
-	ModelGPT4          Model = "gpt-4"
-	ModelGPT4K32       Model = "gpt-4-32k"
+	ModelGPT35Turbo            Model = "gpt-3.5-turbo"
+	ModelGPT35TurboK16         Model = "gpt-3.5-turbo-16k"
+	ModelGPT35TurboInstruction Model = "gpt-3.5-turbo-instruct"
+	ModelGPT4                  Model = "gpt-4"
+	ModelGPT4K32               Model = "gpt-4-32k"
 )
 
 // MarshalJSON implements the json.Marshaler interface.
 func (m *Model) MarshalJSON() ([]byte, error) {
-	return marshalJSON(m, ModelGPT35Turbo, ModelGPT35TurboK16, ModelGPT4, ModelGPT4K32)
+	return marshalJSON(m, ModelGPT35Turbo, ModelGPT35TurboK16, ModelGPT35TurboInstruction, ModelGPT4, ModelGPT4K32)
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface.
 func (m *Model) UnmarshalJSON(b []byte) error {
-	return unMarshalJSON(m, b, ModelGPT35Turbo, ModelGPT35TurboK16, ModelGPT4, ModelGPT4K32)
+	return unMarshalJSON(m, b, ModelGPT35Turbo, ModelGPT35TurboK16, ModelGPT35TurboInstruction, ModelGPT4, ModelGPT4K32)
 }
 
 // FinishReason is a type of response finish reason.
