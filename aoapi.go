@@ -27,8 +27,8 @@ var (
 		ModelGPT35TurboInstruction: 4096,
 		ModelGPT4:                  8192,
 		ModelGPT4K32:               32768,
-		ModelGPT4Preview:           128000, // max output is 4096
-		ModelGPT4VisionPreview:     128000, // max output is 4096
+		ModelGPT4Preview:           4096, // but total input+output is 128000
+		ModelGPT4VisionPreview:     4096, // but total input+output is 128000
 	}
 )
 
