@@ -19,6 +19,17 @@ var (
 
 	// ErrResponse is an error that occurs when the response is empty.
 	ErrResponse = errors.New("failed response")
+
+	// TokenLimits is a map of AI model names and the maximum number of tokens for them.
+	TokenLimits = map[Model]uint{
+		ModelGPT35Turbo:            4096,
+		ModelGPT35TurboK16:         16385,
+		ModelGPT35TurboInstruction: 4096,
+		ModelGPT4:                  8192,
+		ModelGPT4K32:               32768,
+		ModelGPT4Preview:           128000, // max output is 4096
+		ModelGPT4VisionPreview:     128000, // max output is 4096
+	}
 )
 
 // Message is a struct of user message.
@@ -66,6 +77,13 @@ func (c *CompletionRequest) marshal() (io.Reader, error) {
 
 	if len(c.Messages) == 0 {
 		return nil, errors.Join(ErrRequiredParam, fmt.Errorf("messages must not be empty"))
+	}
+
+	if c.MaxTokens > 0 && c.MaxTokens > TokenLimits[c.Model] {
+		return nil, errors.Join(
+			ErrRequiredParam,
+			fmt.Errorf("max tokens limit is %d, but gotten %d", TokenLimits[c.Model], c.MaxTokens),
+		)
 	}
 
 	data, err := json.Marshal(c)

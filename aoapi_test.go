@@ -518,3 +518,55 @@ func TestCompletionResponse_UsageInfo(t *testing.T) {
 		t.Errorf("expected %v, got %v", expected, s)
 	}
 }
+
+func TestCompletionRequestMaxTokens(t *testing.T) {
+	testCases := []struct {
+		name      string
+		model     Model
+		maxTokens uint
+		withErr   bool
+	}{
+		{
+			name:  "valid_no_limit",
+			model: ModelGPT35Turbo,
+		},
+		{
+			name:      "valid_with_limit",
+			model:     ModelGPT35TurboK16,
+			maxTokens: TokenLimits[ModelGPT35TurboK16] - 1,
+		},
+		{
+			name:      "failed",
+			model:     ModelGPT4,
+			maxTokens: TokenLimits[ModelGPT4] + 1,
+			withErr:   true,
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+		t.Run(tc.name, func(t *testing.T) {
+			request := CompletionRequest{
+				Model:     tc.model,
+				Messages:  []Message{{Role: RoleSystem, Content: "Hello, world!"}},
+				MaxTokens: tc.maxTokens,
+			}
+			_, err := request.marshal()
+
+			switch {
+			case err != nil && !tc.withErr:
+				t.Errorf("unexpected error: %v", err)
+			case err == nil && tc.withErr:
+				t.Errorf("expected error")
+			case err != nil:
+				if !errors.Is(err, ErrRequiredParam) {
+					t.Errorf("expected %v, got %v", ErrRequiredParam, err)
+				}
+
+				if s := err.Error(); !strings.Contains(s, "max tokens limit") {
+					t.Errorf("not found required error string, got %q", s)
+				}
+			}
+		})
+	}
+}

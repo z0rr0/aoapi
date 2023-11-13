@@ -141,6 +141,16 @@ func TestModel_MarshalJSON(t *testing.T) {
 			expected: `"gpt-4-32k"`,
 		},
 		{
+			name:     "gpt-4-1106-preview",
+			model:    ModelGPT4Preview,
+			expected: `"gpt-4-1106-preview"`,
+		},
+		{
+			name:     "gpt-4-1106-vision-preview",
+			model:    ModelGPT4VisionPreview,
+			expected: `"gpt-4-1106-vision-preview"`,
+		},
+		{
 			name:  "unknown",
 			model: Model("unknown"),
 			err:   ErrMarshalJSON,
@@ -200,6 +210,16 @@ func TestModel_UnmarshalJSON(t *testing.T) {
 			name:     "gpt-4-32k",
 			data:     `"gpt-4-32k"`,
 			expected: ModelGPT4K32,
+		},
+		{
+			name:     "gpt-4-1106-preview",
+			data:     `"gpt-4-1106-preview"`,
+			expected: ModelGPT4Preview,
+		},
+		{
+			name:     "gpt-4-1106-vision-preview",
+			data:     `"gpt-4-1106-vision-preview"`,
+			expected: ModelGPT4VisionPreview,
 		},
 		{
 			name: "unknown",
