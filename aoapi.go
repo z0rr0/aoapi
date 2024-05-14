@@ -29,6 +29,7 @@ var (
 		ModelGPT4K32:               32768,
 		ModelGPT4Preview:           4096, // but total input+output is 128000
 		ModelGPT4VisionPreview:     4096, // but total input+output is 128000
+		ModelGPT4o:                 4096, // but total input+output is 128000
 	}
 )
 
