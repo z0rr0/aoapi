@@ -47,6 +47,7 @@ const (
 	ModelGPT4Preview           Model = "gpt-4-1106-preview"
 	ModelGPT4VisionPreview     Model = "gpt-4-1106-vision-preview"
 	ModelGPT4o                 Model = "gpt-4o"
+	ModelGPT4oMini             Model = "gpt-4o-mini"
 )
 
 // MarshalJSON implements the json.Marshaler interface.
@@ -54,7 +55,7 @@ func (m *Model) MarshalJSON() ([]byte, error) {
 	return marshalJSON(
 		m,
 		ModelGPT35Turbo, ModelGPT35TurboK16, ModelGPT35TurboInstruction,
-		ModelGPT4, ModelGPT4K32, ModelGPT4Preview, ModelGPT4VisionPreview, ModelGPT4o,
+		ModelGPT4, ModelGPT4K32, ModelGPT4Preview, ModelGPT4VisionPreview, ModelGPT4o, ModelGPT4oMini,
 	)
 }
 
@@ -63,7 +64,7 @@ func (m *Model) UnmarshalJSON(b []byte) error {
 	return unMarshalJSON(
 		m, b,
 		ModelGPT35Turbo, ModelGPT35TurboK16, ModelGPT35TurboInstruction,
-		ModelGPT4, ModelGPT4K32, ModelGPT4Preview, ModelGPT4VisionPreview, ModelGPT4o,
+		ModelGPT4, ModelGPT4K32, ModelGPT4Preview, ModelGPT4VisionPreview, ModelGPT4o, ModelGPT4oMini,
 	)
 }
 

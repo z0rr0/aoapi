@@ -156,6 +156,11 @@ func TestModel_MarshalJSON(t *testing.T) {
 			expected: `"gpt-4o"`,
 		},
 		{
+			name:     "gpt-4o-mini",
+			model:    ModelGPT4oMini,
+			expected: `"gpt-4o-mini"`,
+		},
+		{
 			name:  "unknown",
 			model: Model("unknown"),
 			err:   ErrMarshalJSON,
@@ -230,6 +235,11 @@ func TestModel_UnmarshalJSON(t *testing.T) {
 			name:     "gpt-4o",
 			data:     `"gpt-4o"`,
 			expected: ModelGPT4o,
+		},
+		{
+			name:     "gpt-4o-mini",
+			data:     `"gpt-4o-mini"`,
+			expected: ModelGPT4oMini,
 		},
 		{
 			name: "unknown",
