@@ -40,7 +40,7 @@ func ExampleCompletion() {
 
 	client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment}}
 	request := &aoapi.CompletionRequest{
-		Model: aoapi.ModelGPT35Turbo,
+		Model: aoapi.ModelGPT4oMini,
 		Messages: []aoapi.Message{
 			{
 				Role:    aoapi.RoleSystem,

@@ -7,7 +7,8 @@
 
 Ask OpenIA API.
 
-This is a simple Go package for OpenAI chat completion and image generation APIs.
+This is a simple Go package for [OpenAI chat completion](https://platform.openai.com/docs/api-reference/chat/create)
+and image generation APIs.
 
 ## Usage
 
@@ -19,7 +20,7 @@ defer cancel()
 
 client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment}}
 request := &aoapi.CompletionRequest{
-    Model: aoapi.ModelGPT35Turbo,
+    Model: aoapi.ModelGPT4oMini,
     Messages: []aoapi.Message{
         {
             Role:    aoapi.RoleSystem,
