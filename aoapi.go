@@ -13,6 +13,13 @@ import (
 	"time"
 )
 
+const (
+	// OpenAICompletionURL is the default URL for the OpenAI chat completion API.
+	OpenAICompletionURL = "https://api.openai.com/v1/chat/completions"
+	// DeepSeekCompletionURL is the URL for the DeepSeek chat completion API.
+	DeepSeekCompletionURL = "https://api.deepseek.com/v1/chat/completions"
+)
+
 var (
 	// ErrRequiredParam is an error that occurs when a required parameter is missing.
 	ErrRequiredParam = errors.New("required parameter is missing")

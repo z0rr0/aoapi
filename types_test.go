@@ -161,6 +161,11 @@ func TestModel_MarshalJSON(t *testing.T) {
 			expected: `"gpt-4o-mini"`,
 		},
 		{
+			name:     "deepseek",
+			model:    ModeDeepSeek,
+			expected: `"deepseek-chat"`,
+		},
+		{
 			name:  "unknown",
 			model: Model("unknown"),
 			err:   ErrMarshalJSON,
@@ -169,6 +174,7 @@ func TestModel_MarshalJSON(t *testing.T) {
 
 	for i := range testCases {
 		tc := testCases[i]
+
 		t.Run(tc.name, func(t *testing.T) {
 			data, err := tc.model.MarshalJSON()
 			if err != nil {
@@ -242,6 +248,11 @@ func TestModel_UnmarshalJSON(t *testing.T) {
 			expected: ModelGPT4oMini,
 		},
 		{
+			name:     "deepseek",
+			data:     `"deepseek-chat"`,
+			expected: ModeDeepSeek,
+		},
+		{
 			name: "unknown",
 			data: `"unknown"`,
 			err:  ErrUnmarshalJSON,
@@ -250,6 +261,7 @@ func TestModel_UnmarshalJSON(t *testing.T) {
 
 	for i := range testCases {
 		tc := testCases[i]
+
 		t.Run(tc.name, func(t *testing.T) {
 			var model Model
 			err := model.UnmarshalJSON([]byte(tc.data))

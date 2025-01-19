@@ -10,6 +10,16 @@ Ask OpenIA API.
 This is a simple Go package for [OpenAI chat completion](https://platform.openai.com/docs/api-reference/chat/create)
 and image generation APIs.
 
+It also support OpenAI compatible [DeepSeek API](https://api-docs.deepseek.com/)
+with model name `aoapi.ModeDeepSeek` and URL `aoapi.DeepSeekCompletionURL`.
+
+## Test
+
+```sh
+go test -cover -race ./...
+ok github.com/z0rr0/aoapi (cached) coverage: 95.8% of statements
+```
+
 ## Usage
 
 Example of usage ChatGPT as a translator from English to German:
@@ -20,31 +30,31 @@ defer cancel()
 
 client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment}}
 request := &aoapi.CompletionRequest{
-    Model: aoapi.ModelGPT4oMini,
-    Messages: []aoapi.Message{
-        {
-            Role:    aoapi.RoleSystem,
-            Content: "You are translator from English to German. " +
-                "Translate the following sentences.",
-        },
-        {
-            Role:    aoapi.RoleUser,
-            Content: "Hello, how are you? What are you doing?",
-        },
-    },
-    MaxTokens: 512,  // 0 - no limit
+	Model: aoapi.ModelGPT4oMini,
+	Messages: []aoapi.Message{
+		{
+			Role:	aoapi.RoleSystem,
+			Content: "You are translator from English to German. " +
+				"Translate the following sentences.",
+		},
+		{
+			Role:	aoapi.RoleUser,
+			Content: "Hello, how are you? What are you doing?",
+		},
+	},
+	MaxTokens: 512, // 0 - no limit
 }
 
 params := aoapi.Params{
 	Bearer: os.Getenv("OPENAI_API_KEY"),
 	Organization: os.Getenv("OPENAI_ORGANIZATION"),
-	URL: "https://api.openai.com/v1/chat/completions",
+	URL: aoapi.OpenAICompletionURL, // "https://api.openai.com/v1/chat/completions",
 	StopMarker: "...",
 }
 
 resp, err := aoapi.Completion(ctx, client, request, params)
 if err != nil {
-    panic(err)  // or handle error
+	panic(err) // handle error without panic in real code
 }
 
 // "Hallo, wie geht es dir? Was machst du?"
