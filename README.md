@@ -10,8 +10,8 @@ Ask OpenIA API.
 This is a simple Go package for [OpenAI chat completion](https://platform.openai.com/docs/api-reference/chat/create)
 and image generation APIs.
 
-It also support OpenAI compatible [DeepSeek API](https://api-docs.deepseek.com/)
-with model name `aoapi.ModeDeepSeek` and URL `aoapi.DeepSeekCompletionURL`.
+It also supports OpenAI compatible [DeepSeek API](https://api-docs.deepseek.com/)
+with a model name `aoapi.ModeDeepSeek` and URL `aoapi.DeepSeekCompletionURL`.
 
 ## Test
 
