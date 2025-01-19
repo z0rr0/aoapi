@@ -38,6 +38,7 @@ var (
 		ModelGPT4VisionPreview:     4096, // but total input+output is 128000
 		ModelGPT4o:                 4096, // but total input+output is 128000
 		ModelGPT4oMini:             4096, // but total input+output is 128000
+		ModeDeepSeek:               8192, // but total input+output is 64000
 	}
 )
 
