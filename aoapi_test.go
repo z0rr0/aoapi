@@ -221,6 +221,8 @@ func TestCompletionRequestMarshal(t *testing.T) {
 }
 
 func TestCompletion(t *testing.T) {
+	var serverURL = OpenAICompletionURL // only to use for testing
+
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if ct := r.Header.Get("Content-Type"); ct != "application/json" {
 			t.Errorf("failed content type header: %q", ct)
@@ -241,7 +243,9 @@ func TestCompletion(t *testing.T) {
 			t.Error(err)
 		}
 	}))
+
 	defer s.Close()
+	serverURL = s.URL
 
 	client := s.Client()
 	request := &CompletionRequest{
@@ -253,7 +257,7 @@ func TestCompletion(t *testing.T) {
 		MaxTokens: 100,
 	}
 
-	params := Params{Bearer: "test", URL: s.URL, Organization: "test-org"}
+	params := Params{Bearer: "test", URL: serverURL, Organization: "test-org"}
 	response, err := Completion(context.Background(), client, request, params)
 
 	if err != nil {
@@ -278,10 +282,14 @@ func TestCompletion(t *testing.T) {
 }
 
 func TestCompletionFailedStatus(t *testing.T) {
+	var serverURL = DeepSeekCompletionURL // only to use for testing
+
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "test", http.StatusBadGateway)
 	}))
+
 	defer s.Close()
+	serverURL = s.URL
 
 	client := s.Client()
 	request := &CompletionRequest{
@@ -292,7 +300,7 @@ func TestCompletionFailedStatus(t *testing.T) {
 		},
 		MaxTokens: 100,
 	}
-	_, err := Completion(context.Background(), client, request, Params{Bearer: "test", URL: s.URL})
+	_, err := Completion(context.Background(), client, request, Params{Bearer: "test", URL: serverURL})
 
 	if err == nil {
 		t.Fatal("expected error")
