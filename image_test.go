@@ -14,14 +14,17 @@ func compareImageResponse(a, b ImageResponse) bool {
 	if a.Created != b.Created {
 		return false
 	}
+
 	if len(a.Data) != len(b.Data) {
 		return false
 	}
+
 	for i := range a.Data {
 		if a.Data[i].URL != b.Data[i].URL {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -110,16 +113,48 @@ func TestImageResponse_String(t *testing.T) {
 }
 
 func TestImageFailedRequest(t *testing.T) {
-	client := http.DefaultClient
-	request := &ImageRequest{N: 2, Size: ImageSize256} // no messages
-	_, err := Image(context.Background(), client, request, Params{Bearer: "test", URL: ":"})
-
-	if err == nil {
-		t.Fatal("expected error")
+	testCases := []struct {
+		name          string
+		request       ImageRequest
+		expectedError string
+	}{
+		{
+			name:          "empty",
+			request:       ImageRequest{},
+			expectedError: "prompt must not be empty",
+		},
+		{
+			name:          "no prompt",
+			request:       ImageRequest{N: 2, Size: ImageSize256},
+			expectedError: "prompt must not be empty",
+		},
+		{
+			name:          "invalid model",
+			request:       ImageRequest{Model: ModelGPT4, Prompt: "test"},
+			expectedError: "model \"gpt-4\" is not allowed for image requests",
+		},
 	}
 
-	if !errors.Is(err, ErrRequiredParam) {
-		t.Fatalf("expected %v, got %v", ErrResponse, err)
+	client := http.DefaultClient
+	ctx := context.Background()
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := Image(ctx, client, &tc.request, Params{Bearer: "test", URL: ":"})
+			if err == nil {
+				t.Fatal("expected error")
+			}
+
+			if !errors.Is(err, ErrRequiredParam) {
+				t.Fatalf("expected %v, got %v", ErrRequiredParam, err)
+			}
+
+			if e := err.Error(); !strings.Contains(e, tc.expectedError) {
+				t.Fatalf("expected %q, got %q", tc.expectedError, e)
+			}
+		})
 	}
 }
 

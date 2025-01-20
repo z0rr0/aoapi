@@ -29,16 +29,15 @@ var (
 
 	// TokenLimits is a map of AI model names and the maximum number of tokens for them.
 	TokenLimits = map[Model]uint{
-		ModelGPT35Turbo:            4096,
-		ModelGPT35TurboK16:         16385,
-		ModelGPT35TurboInstruction: 4096,
-		ModelGPT4:                  8192,
-		ModelGPT4K32:               32768,
-		ModelGPT4Preview:           4096, // but total input+output is 128000
-		ModelGPT4VisionPreview:     4096, // but total input+output is 128000
-		ModelGPT4o:                 4096, // but total input+output is 128000
-		ModelGPT4oMini:             4096, // but total input+output is 128000
-		ModeDeepSeek:               8192, // but total input+output is 64000
+		ModelGPT35Turbo:       4096,
+		ModelGPT4:             16384,
+		ModelGPT4o:            4096,  // but total input+output is 128k
+		ModelGPT4oTurbo:       4096,  // but total input+output is 128k
+		ModelGPT4oMini:        4096,  // but total input+output is 128k
+		ModelGPTo1Mini:        65536, // but total input+output is 128k
+		ModelGPTo1Preview:     32768, // but total input+output is 128k
+		ModelDeepSeekChat:     8192,  // but total input+output is 64k
+		ModelDeepSeekReasoner: 8192,  // but total input+output is 64k
 	}
 )
 

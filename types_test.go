@@ -121,34 +121,9 @@ func TestModel_MarshalJSON(t *testing.T) {
 			expected: `"gpt-3.5-turbo"`,
 		},
 		{
-			name:     "gpt-3.5-turbo-16k",
-			model:    ModelGPT35TurboK16,
-			expected: `"gpt-3.5-turbo-16k"`,
-		},
-		{
-			name:     "gpt-3.5-turbo-instruct",
-			model:    ModelGPT35TurboInstruction,
-			expected: `"gpt-3.5-turbo-instruct"`,
-		},
-		{
 			name:     "gpt-4",
 			model:    ModelGPT4,
 			expected: `"gpt-4"`,
-		},
-		{
-			name:     "gpt-4-32k",
-			model:    ModelGPT4K32,
-			expected: `"gpt-4-32k"`,
-		},
-		{
-			name:     "gpt-4-1106-preview",
-			model:    ModelGPT4Preview,
-			expected: `"gpt-4-1106-preview"`,
-		},
-		{
-			name:     "gpt-4-1106-vision-preview",
-			model:    ModelGPT4VisionPreview,
-			expected: `"gpt-4-1106-vision-preview"`,
 		},
 		{
 			name:     "gpt-4o",
@@ -161,9 +136,39 @@ func TestModel_MarshalJSON(t *testing.T) {
 			expected: `"gpt-4o-mini"`,
 		},
 		{
-			name:     "deepseek",
-			model:    ModeDeepSeek,
+			name:     "gpt-4o-turbo",
+			model:    ModelGPT4oTurbo,
+			expected: `"gpt-4o-turbo"`,
+		},
+		{
+			name:     "o1-mini",
+			model:    ModelGPTo1Mini,
+			expected: `"o1-mini"`,
+		},
+		{
+			name:     "o1-preview",
+			model:    ModelGPTo1Preview,
+			expected: `"o1-preview"`,
+		},
+		{
+			name:     "deepseek-chat",
+			model:    ModelDeepSeekChat,
 			expected: `"deepseek-chat"`,
+		},
+		{
+			name:     "deepseek-reasoner",
+			model:    ModelDeepSeekReasoner,
+			expected: `"deepseek-reasoner"`,
+		},
+		{
+			name:     "dall-e-2",
+			model:    ModelDalle2,
+			expected: `"dall-e-2"`,
+		},
+		{
+			name:     "dall-e-3",
+			model:    ModelDalle3,
+			expected: `"dall-e-3"`,
 		},
 		{
 			name:  "unknown",
@@ -208,34 +213,9 @@ func TestModel_UnmarshalJSON(t *testing.T) {
 			expected: ModelGPT35Turbo,
 		},
 		{
-			name:     "gpt-3.5-turbo-16k",
-			data:     `"gpt-3.5-turbo-16k"`,
-			expected: ModelGPT35TurboK16,
-		},
-		{
-			name:     "gpt-3.5-turbo-instruct",
-			data:     `"gpt-3.5-turbo-instruct"`,
-			expected: ModelGPT35TurboInstruction,
-		},
-		{
 			name:     "gpt-4",
 			data:     `"gpt-4"`,
 			expected: ModelGPT4,
-		},
-		{
-			name:     "gpt-4-32k",
-			data:     `"gpt-4-32k"`,
-			expected: ModelGPT4K32,
-		},
-		{
-			name:     "gpt-4-1106-preview",
-			data:     `"gpt-4-1106-preview"`,
-			expected: ModelGPT4Preview,
-		},
-		{
-			name:     "gpt-4-1106-vision-preview",
-			data:     `"gpt-4-1106-vision-preview"`,
-			expected: ModelGPT4VisionPreview,
 		},
 		{
 			name:     "gpt-4o",
@@ -248,9 +228,39 @@ func TestModel_UnmarshalJSON(t *testing.T) {
 			expected: ModelGPT4oMini,
 		},
 		{
-			name:     "deepseek",
+			name:     "gpt-4o-turbo",
+			data:     `"gpt-4o-turbo"`,
+			expected: ModelGPT4oTurbo,
+		},
+		{
+			name:     "o1-mini",
+			data:     `"o1-mini"`,
+			expected: ModelGPTo1Mini,
+		},
+		{
+			name:     "o1-preview",
+			data:     `"o1-preview"`,
+			expected: ModelGPTo1Preview,
+		},
+		{
+			name:     "deepseek-chan",
 			data:     `"deepseek-chat"`,
-			expected: ModeDeepSeek,
+			expected: ModelDeepSeekChat,
+		},
+		{
+			name:     "deepseek-reasoner",
+			data:     `"deepseek-reasoner"`,
+			expected: ModelDeepSeekReasoner,
+		},
+		{
+			name:     "dall-e-2",
+			data:     `"dall-e-2"`,
+			expected: ModelDalle2,
+		},
+		{
+			name:     "dall-e-3",
+			data:     `"dall-e-3"`,
+			expected: ModelDalle3,
 		},
 		{
 			name: "unknown",
@@ -278,6 +288,11 @@ func TestModel_UnmarshalJSON(t *testing.T) {
 
 			if model != tc.expected {
 				t.Fatalf("expected: %v, got: %v", tc.expected, model)
+			}
+
+			_, isImage := imageModels[model]
+			if _, ok := TokenLimits[model]; !(ok || isImage) {
+				t.Errorf("model %v has no token limit", model)
 			}
 		})
 	}

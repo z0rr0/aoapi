@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	// to disable linter warnings for unused variables
+	// to disable linter warnings for unused code
 	_ = OpenAICompletionURL
 	_ = DeepSeekCompletionURL
 )
@@ -71,7 +71,7 @@ func TestCompletionRequestMarshal(t *testing.T) {
 		},
 		{
 			name:      "empty messages",
-			request:   CompletionRequest{Model: ModelGPT4K32},
+			request:   CompletionRequest{Model: ModelGPT4},
 			err:       ErrRequiredParam,
 			errString: "required parameter is missing\nmessages must not be empty",
 		},
@@ -103,19 +103,19 @@ func TestCompletionRequestMarshal(t *testing.T) {
 		{
 			name: "with name",
 			request: CompletionRequest{
-				Model: ModelGPT35TurboK16,
+				Model: ModelGPTo1Mini,
 				Messages: []Message{
 					{Role: RoleAssistant, Content: "This is an assistant message", Name: "assistant"},
 				},
 			},
 			expected: []string{
-				`"model":"gpt-3.5-turbo-16k"`,
+				`"model":"o1-mini"`,
 				`"messages":[`,
 				`"role":"assistant"`,
 				`"content":"This is an assistant message"`,
 				`"name":"assistant"`,
 			},
-			length: 123,
+			length: 113,
 		},
 		{
 			name: "with optional",
@@ -538,8 +538,8 @@ func TestCompletionRequestMaxTokens(t *testing.T) {
 		},
 		{
 			name:      "valid_with_limit",
-			model:     ModelGPT35TurboK16,
-			maxTokens: TokenLimits[ModelGPT35TurboK16] - 1,
+			model:     ModelGPT4,
+			maxTokens: TokenLimits[ModelGPT4] - 1,
 		},
 		{
 			name:      "failed",

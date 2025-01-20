@@ -39,25 +39,30 @@ type Model string
 
 // AI model names.
 const (
-	ModelGPT35Turbo            Model = "gpt-3.5-turbo"
-	ModelGPT35TurboK16         Model = "gpt-3.5-turbo-16k"
-	ModelGPT35TurboInstruction Model = "gpt-3.5-turbo-instruct"
-	ModelGPT4                  Model = "gpt-4"
-	ModelGPT4K32               Model = "gpt-4-32k"
-	ModelGPT4Preview           Model = "gpt-4-1106-preview"
-	ModelGPT4VisionPreview     Model = "gpt-4-1106-vision-preview"
-	ModelGPT4o                 Model = "gpt-4o"
-	ModelGPT4oMini             Model = "gpt-4o-mini"
-	ModeDeepSeek               Model = "deepseek-chat" // DeepSeek model
+	ModelDalle2           Model = "dall-e-2" // only for image requests
+	ModelDalle3           Model = "dall-e-3" // only for image requests
+	ModelGPT35Turbo       Model = "gpt-3.5-turbo"
+	ModelGPT4             Model = "gpt-4"
+	ModelGPT4o            Model = "gpt-4o"
+	ModelGPT4oTurbo       Model = "gpt-4o-turbo"
+	ModelGPT4oMini        Model = "gpt-4o-mini"
+	ModelGPTo1Mini        Model = "o1-mini"
+	ModelGPTo1Preview     Model = "o1-preview"
+	ModelDeepSeekChat     Model = "deepseek-chat"     // DeepSeek base model
+	ModelDeepSeekReasoner Model = "deepseek-reasoner" // DeepSeek model with reasoning
 )
+
+// all models for image generation
+var imageModels = map[Model]struct{}{ModelDalle2: {}, ModelDalle3: {}}
 
 // MarshalJSON implements the json.Marshaler interface.
 func (m *Model) MarshalJSON() ([]byte, error) {
 	return marshalJSON(
 		m,
-		ModelGPT35Turbo, ModelGPT35TurboK16, ModelGPT35TurboInstruction,
-		ModelGPT4, ModelGPT4K32, ModelGPT4Preview, ModelGPT4VisionPreview,
-		ModelGPT4o, ModelGPT4oMini, ModeDeepSeek,
+		ModelDalle2, ModelDalle3,
+		ModelGPT35Turbo, ModelGPT4, ModelGPT4o, ModelGPT4oTurbo, ModelGPT4oMini,
+		ModelGPTo1Mini, ModelGPTo1Preview,
+		ModelDeepSeekChat, ModelDeepSeekReasoner,
 	)
 }
 
@@ -65,9 +70,10 @@ func (m *Model) MarshalJSON() ([]byte, error) {
 func (m *Model) UnmarshalJSON(b []byte) error {
 	return unMarshalJSON(
 		m, b,
-		ModelGPT35Turbo, ModelGPT35TurboK16, ModelGPT35TurboInstruction,
-		ModelGPT4, ModelGPT4K32, ModelGPT4Preview, ModelGPT4VisionPreview,
-		ModelGPT4o, ModelGPT4oMini, ModeDeepSeek,
+		ModelDalle2, ModelDalle3,
+		ModelGPT35Turbo, ModelGPT4, ModelGPT4o, ModelGPT4oTurbo, ModelGPT4oMini,
+		ModelGPTo1Mini, ModelGPTo1Preview,
+		ModelDeepSeekChat, ModelDeepSeekReasoner,
 	)
 }
 

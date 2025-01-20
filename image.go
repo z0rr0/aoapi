@@ -23,12 +23,19 @@ const (
 
 // ImageRequest is a struct of image request.
 type ImageRequest struct {
+	Model  Model     `json:"model,omitempty"`
 	Prompt string    `json:"prompt"`
 	N      uint      `json:"n,omitempty"`
 	Size   ImageSize `json:"size,omitempty"`
 }
 
 func (i *ImageRequest) marshal() (io.Reader, error) {
+	if i.Model != "" {
+		if _, ok := imageModels[i.Model]; !ok {
+			return nil, errors.Join(ErrRequiredParam, fmt.Errorf("model %q is not allowed for image requests", i.Model))
+		}
+	}
+
 	if i.Prompt == "" {
 		return nil, errors.Join(ErrRequiredParam, fmt.Errorf("prompt must not be empty"))
 	}

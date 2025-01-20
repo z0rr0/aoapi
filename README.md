@@ -11,13 +11,13 @@ This is a simple Go package for [OpenAI chat completion](https://platform.openai
 and image generation APIs.
 
 It also supports OpenAI compatible [DeepSeek API](https://api-docs.deepseek.com/)
-with a model name `aoapi.ModeDeepSeek` and URL `aoapi.DeepSeekCompletionURL`.
+with a model names `aoapi.ModelDeepSeekChat` or `aoapi.ModelDeepSeekReasoner` and URL `aoapi.DeepSeekCompletionURL`.
 
 ## Test
 
 ```sh
 go test -cover -race ./...
-ok github.com/z0rr0/aoapi (cached) coverage: 95.8% of statements
+ok github.com/z0rr0/aoapi (cached) coverage: 95.9% of statements
 ```
 
 ## Usage
