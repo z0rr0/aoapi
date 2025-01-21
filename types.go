@@ -103,14 +103,11 @@ type StringCommonType interface {
 
 // marshalJSON is a generic function for custom types JSON marshal.
 func marshalJSON[T StringCommonType](t *T, values ...T) ([]byte, error) {
-	var (
-		v = *t
-		s = string(v)
-	)
+	var v = *t
 
 	for _, value := range values {
 		if v == value {
-			return json.Marshal(s)
+			return json.Marshal(string(v))
 		}
 	}
 

@@ -386,8 +386,9 @@ func TestCompletionFailedJSON(t *testing.T) {
 		t.Fatal("expected error")
 	}
 
-	if e := err.Error(); !strings.HasPrefix(e, "failed to unmarshal response") {
-		t.Fatalf("expected %q, got %q", "failed to unmarshal response", e)
+	expected := "failed response\nfailed to unmarshal response: unexpected EOF"
+	if got := err.Error(); got != expected {
+		t.Fatalf("expected %q, got %q", expected, got)
 	}
 }
 

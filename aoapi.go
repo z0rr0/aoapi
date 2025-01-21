@@ -88,7 +88,7 @@ func (c *CompletionRequest) marshal() (io.Reader, error) {
 		return nil, errors.Join(ErrRequiredParam, fmt.Errorf("messages must not be empty"))
 	}
 
-	if c.MaxTokens > 0 && c.MaxTokens > TokenLimits[c.Model] {
+	if (c.MaxTokens > 0) && (c.MaxTokens > TokenLimits[c.Model]) {
 		return nil, errors.Join(
 			ErrRequiredParam,
 			fmt.Errorf("max tokens limit is %d, but gotten %d", TokenLimits[c.Model], c.MaxTokens),
@@ -137,7 +137,7 @@ type CompletionResponse struct {
 
 func (r *CompletionResponse) build(body io.Reader) error {
 	if err := json.NewDecoder(body).Decode(&r); err != nil {
-		return fmt.Errorf("failed to unmarshal response: %w", err)
+		return errors.Join(ErrResponse, fmt.Errorf("failed to unmarshal response: %w", err))
 	}
 
 	if len(r.Choices) == 0 {
@@ -155,10 +155,10 @@ func (r *CompletionResponse) String() string {
 		hasMarker = r.stopMarker != ""
 	)
 
-	for i := range r.Choices {
-		builder.WriteString(r.Choices[i].Message.Content)
+	for _, choice := range r.Choices {
+		builder.WriteString(choice.Message.Content)
 
-		if hasMarker && (r.Choices[i].FinishReason == FinishReasonLength) {
+		if hasMarker && (choice.FinishReason == FinishReasonLength) {
 			builder.WriteString(r.stopMarker)
 		}
 	}
