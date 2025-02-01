@@ -141,6 +141,11 @@ func TestModel_MarshalJSON(t *testing.T) {
 			expected: `"gpt-4o-turbo"`,
 		},
 		{
+			name:     "o1",
+			model:    ModelGPTo1,
+			expected: `"o1"`,
+		},
+		{
 			name:     "o1-mini",
 			model:    ModelGPTo1Mini,
 			expected: `"o1-mini"`,
@@ -149,6 +154,11 @@ func TestModel_MarshalJSON(t *testing.T) {
 			name:     "o1-preview",
 			model:    ModelGPTo1Preview,
 			expected: `"o1-preview"`,
+		},
+		{
+			name:     "o3-mini",
+			model:    ModelGPTo3Mini,
+			expected: `"o3-mini"`,
 		},
 		{
 			name:     "deepseek-chat",
@@ -233,6 +243,11 @@ func TestModel_UnmarshalJSON(t *testing.T) {
 			expected: ModelGPT4oTurbo,
 		},
 		{
+			name:     "o1",
+			data:     `"o1"`,
+			expected: ModelGPTo1,
+		},
+		{
 			name:     "o1-mini",
 			data:     `"o1-mini"`,
 			expected: ModelGPTo1Mini,
@@ -241,6 +256,11 @@ func TestModel_UnmarshalJSON(t *testing.T) {
 			name:     "o1-preview",
 			data:     `"o1-preview"`,
 			expected: ModelGPTo1Preview,
+		},
+		{
+			name:     "o3-mini",
+			data:     `"o3-mini"`,
+			expected: ModelGPTo3Mini,
 		},
 		{
 			name:     "deepseek-chan",
