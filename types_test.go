@@ -141,6 +141,11 @@ func TestModel_MarshalJSON(t *testing.T) {
 			expected: `"gpt-4o-turbo"`,
 		},
 		{
+			name:     "gpt-4.5-preview",
+			model:    ModelGPT45Preview,
+			expected: `"gpt-4.5-preview"`,
+		},
+		{
 			name:     "o1",
 			model:    ModelGPTo1,
 			expected: `"o1"`,
@@ -241,6 +246,11 @@ func TestModel_UnmarshalJSON(t *testing.T) {
 			name:     "gpt-4o-turbo",
 			data:     `"gpt-4o-turbo"`,
 			expected: ModelGPT4oTurbo,
+		},
+		{
+			name:     "gpt-4.5-preview",
+			data:     `"gpt-4.5-preview"`,
+			expected: ModelGPT45Preview,
 		},
 		{
 			name:     "o1",

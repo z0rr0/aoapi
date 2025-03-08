@@ -46,6 +46,7 @@ const (
 	ModelGPT4o            Model = "gpt-4o"
 	ModelGPT4oTurbo       Model = "gpt-4o-turbo"
 	ModelGPT4oMini        Model = "gpt-4o-mini"
+	ModelGPT45Preview     Model = "gpt-4.5-preview"
 	ModelGPTo1            Model = "o1"
 	ModelGPTo1Mini        Model = "o1-mini"
 	ModelGPTo1Preview     Model = "o1-preview"
@@ -62,7 +63,7 @@ func (m *Model) MarshalJSON() ([]byte, error) {
 	return marshalJSON(
 		m,
 		ModelDalle2, ModelDalle3,
-		ModelGPT35Turbo, ModelGPT4, ModelGPT4o, ModelGPT4oTurbo, ModelGPT4oMini,
+		ModelGPT35Turbo, ModelGPT4, ModelGPT4o, ModelGPT4oTurbo, ModelGPT4oMini, ModelGPT45Preview,
 		ModelGPTo1, ModelGPTo1Mini, ModelGPTo1Preview, ModelGPTo3Mini,
 		ModelDeepSeekChat, ModelDeepSeekReasoner,
 	)
@@ -73,7 +74,7 @@ func (m *Model) UnmarshalJSON(b []byte) error {
 	return unMarshalJSON(
 		m, b,
 		ModelDalle2, ModelDalle3,
-		ModelGPT35Turbo, ModelGPT4, ModelGPT4o, ModelGPT4oTurbo, ModelGPT4oMini,
+		ModelGPT35Turbo, ModelGPT4, ModelGPT4o, ModelGPT4oTurbo, ModelGPT4oMini, ModelGPT45Preview,
 		ModelGPTo1, ModelGPTo1Mini, ModelGPTo1Preview, ModelGPTo3Mini,
 		ModelDeepSeekChat, ModelDeepSeekReasoner,
 	)

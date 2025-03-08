@@ -1,3 +1,3 @@
 module github.com/z0rr0/aoapi
 
-go 1.23
+go 1.24
