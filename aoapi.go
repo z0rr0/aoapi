@@ -31,14 +31,19 @@ var (
 	TokenLimits = map[Model]uint{
 		ModelGPT35Turbo:       4096,    // total input+output is 16k
 		ModelGPT4:             8192,    // total input+output is 8k
+		ModelGPT4Turbo:        4096,    // total input+output is 128k
 		ModelGPT4o:            4096,    // total input+output is 128k
 		ModelGPT4oTurbo:       4096,    // total input+output is 128k
 		ModelGPT4oMini:        4096,    // total input+output is 128k
+		ModelGPT41:            32768,   // total input+output is 1024k
+		ModelGPT41Mini:        32768,   // total input+output is 1024k
+		ModelGPT41Nano:        32768,   // total input+output is 1024k
 		ModelGPT45Preview:     16384,   // total input+output is 128k
 		ModelGPTo1:            100_000, // total input+output is 200k
 		ModelGPTo1Mini:        65536,   // total input+output is 128k
 		ModelGPTo1Preview:     32768,   // total input+output is 128k
 		ModelGPTo3Mini:        100_000, // total input+output is 200k
+		ModelGPTo1Pro:         100_000, // total input+output is 200k
 		ModelDeepSeekChat:     8192,    // total input+output is 64k
 		ModelDeepSeekReasoner: 8192,    // total input+output is 64k
 	}

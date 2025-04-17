@@ -186,6 +186,31 @@ func TestModel_MarshalJSON(t *testing.T) {
 			expected: `"dall-e-3"`,
 		},
 		{
+			name:     "gpt-4-turbo",
+			model:    ModelGPT4Turbo,
+			expected: `"gpt-4-turbo"`,
+		},
+		{
+			name:     "gpt-4.1",
+			model:    ModelGPT41,
+			expected: `"gpt-4.1"`,
+		},
+		{
+			name:     "gpt-4.1-mini",
+			model:    ModelGPT41Mini,
+			expected: `"gpt-4.1-mini"`,
+		},
+		{
+			name:     "gpt-4.1-nano",
+			model:    ModelGPT41Nano,
+			expected: `"gpt-4.1-nano"`,
+		},
+		{
+			name:     "o1-pro",
+			model:    ModelGPTo1Pro,
+			expected: `"o1-pro"`,
+		},
+		{
 			name:  "unknown",
 			model: Model("unknown"),
 			err:   ErrMarshalJSON,
@@ -291,6 +316,31 @@ func TestModel_UnmarshalJSON(t *testing.T) {
 			name:     "dall-e-3",
 			data:     `"dall-e-3"`,
 			expected: ModelDalle3,
+		},
+		{
+			name:     "gpt-4-turbo",
+			data:     `"gpt-4-turbo"`,
+			expected: ModelGPT4Turbo,
+		},
+		{
+			name:     "gpt-4.1",
+			data:     `"gpt-4.1"`,
+			expected: ModelGPT41,
+		},
+		{
+			name:     "gpt-4.1-mini",
+			data:     `"gpt-4.1-mini"`,
+			expected: ModelGPT41Mini,
+		},
+		{
+			name:     "gpt-4.1-nano",
+			data:     `"gpt-4.1-nano"`,
+			expected: ModelGPT41Nano,
+		},
+		{
+			name:     "o1-pro",
+			data:     `"o1-pro"`,
+			expected: ModelGPTo1Pro,
 		},
 		{
 			name: "unknown",
