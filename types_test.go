@@ -211,6 +211,11 @@ func TestModel_MarshalJSON(t *testing.T) {
 			expected: `"o1-pro"`,
 		},
 		{
+			name:     "codex-mini-latest",
+			model:    ModelCodexMiniLatest,
+			expected: `"codex-mini-latest"`,
+		},
+		{
 			name:  "unknown",
 			model: Model("unknown"),
 			err:   ErrMarshalJSON,
@@ -341,6 +346,11 @@ func TestModel_UnmarshalJSON(t *testing.T) {
 			name:     "o1-pro",
 			data:     `"o1-pro"`,
 			expected: ModelGPTo1Pro,
+		},
+		{
+			name:     "codex-mini-latest",
+			data:     `"codex-mini-latest"`,
+			expected: ModelCodexMiniLatest,
 		},
 		{
 			name: "unknown",

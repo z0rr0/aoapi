@@ -44,6 +44,7 @@ var (
 		ModelGPTo1Preview:     32768,   // total input+output is 128k
 		ModelGPTo3Mini:        100_000, // total input+output is 200k
 		ModelGPTo1Pro:         100_000, // total input+output is 200k
+		ModelCodexMiniLatest:  100_000, // total input+output is 200k
 		ModelDeepSeekChat:     8192,    // total input+output is 64k
 		ModelDeepSeekReasoner: 8192,    // total input+output is 64k
 	}

@@ -56,6 +56,7 @@ const (
 	ModelGPTo1Preview     Model = "o1-preview"
 	ModelGPTo1Pro         Model = "o1-pro"
 	ModelGPTo3Mini        Model = "o3-mini"
+	ModelCodexMiniLatest  Model = "codex-mini-latest"
 	ModelDeepSeekChat     Model = "deepseek-chat"     // DeepSeek base model
 	ModelDeepSeekReasoner Model = "deepseek-reasoner" // DeepSeek model with reasoning
 )
@@ -70,7 +71,7 @@ func (m *Model) MarshalJSON() ([]byte, error) {
 		ModelDalle2, ModelDalle3,
 		ModelGPT35Turbo, ModelGPT4, ModelGPT4Turbo, ModelGPT4o, ModelGPT4oTurbo, ModelGPT4oMini, ModelGPT45Preview,
 		ModelGPTo1, ModelGPTo1Pro, ModelGPTo1Mini, ModelGPTo1Preview, ModelGPTo3Mini,
-		ModelGPT41, ModelGPT41Mini, ModelGPT41Nano,
+		ModelGPT41, ModelGPT41Mini, ModelGPT41Nano, ModelCodexMiniLatest,
 		ModelDeepSeekChat, ModelDeepSeekReasoner,
 	)
 }
@@ -82,7 +83,7 @@ func (m *Model) UnmarshalJSON(b []byte) error {
 		ModelDalle2, ModelDalle3,
 		ModelGPT35Turbo, ModelGPT4, ModelGPT4Turbo, ModelGPT4o, ModelGPT4oTurbo, ModelGPT4oMini, ModelGPT45Preview,
 		ModelGPTo1, ModelGPTo1Pro, ModelGPTo1Mini, ModelGPTo1Preview, ModelGPTo3Mini,
-		ModelGPT41, ModelGPT41Mini, ModelGPT41Nano,
+		ModelGPT41, ModelGPT41Mini, ModelGPT41Nano, ModelCodexMiniLatest,
 		ModelDeepSeekChat, ModelDeepSeekReasoner,
 	)
 }
