@@ -39,6 +39,10 @@ var (
 		ModelGPT41Mini:        32768,   // total input+output is 1024k
 		ModelGPT41Nano:        32768,   // total input+output is 1024k
 		ModelGPT45Preview:     16384,   // total input+output is 128k
+		ModelGPT5:             128_000, // total input+output is 400k
+		ModelGPT5Mini:         128_000, // total input+output is 400k
+		ModelGPT5Nano:         128_000, // total input+output is 400k
+		ModelGPT5ChatLatest:   128_000, // total input+output is 400k
 		ModelGPTo1:            100_000, // total input+output is 200k
 		ModelGPTo1Mini:        65536,   // total input+output is 128k
 		ModelGPTo1Preview:     32768,   // total input+output is 128k

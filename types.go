@@ -51,6 +51,10 @@ const (
 	ModelGPT41Mini        Model = "gpt-4.1-mini" // only for image requests
 	ModelGPT41Nano        Model = "gpt-4.1-nano" // only for image requests
 	ModelGPT45Preview     Model = "gpt-4.5-preview"
+	ModelGPT5             Model = "gpt-5"
+	ModelGPT5Mini         Model = "gpt-5-mini"
+	ModelGPT5Nano         Model = "gpt-5-nano"
+	ModelGPT5ChatLatest   Model = "gpt-5-chat-latest"
 	ModelGPTo1            Model = "o1"
 	ModelGPTo1Mini        Model = "o1-mini"
 	ModelGPTo1Preview     Model = "o1-preview"
@@ -72,6 +76,7 @@ func (m *Model) MarshalJSON() ([]byte, error) {
 		ModelGPT35Turbo, ModelGPT4, ModelGPT4Turbo, ModelGPT4o, ModelGPT4oTurbo, ModelGPT4oMini, ModelGPT45Preview,
 		ModelGPTo1, ModelGPTo1Pro, ModelGPTo1Mini, ModelGPTo1Preview, ModelGPTo3Mini,
 		ModelGPT41, ModelGPT41Mini, ModelGPT41Nano, ModelCodexMiniLatest,
+		ModelGPT5, ModelGPT5Mini, ModelGPT5Nano, ModelGPT5ChatLatest,
 		ModelDeepSeekChat, ModelDeepSeekReasoner,
 	)
 }
@@ -84,6 +89,7 @@ func (m *Model) UnmarshalJSON(b []byte) error {
 		ModelGPT35Turbo, ModelGPT4, ModelGPT4Turbo, ModelGPT4o, ModelGPT4oTurbo, ModelGPT4oMini, ModelGPT45Preview,
 		ModelGPTo1, ModelGPTo1Pro, ModelGPTo1Mini, ModelGPTo1Preview, ModelGPTo3Mini,
 		ModelGPT41, ModelGPT41Mini, ModelGPT41Nano, ModelCodexMiniLatest,
+		ModelGPT5, ModelGPT5Mini, ModelGPT5Nano, ModelGPT5ChatLatest,
 		ModelDeepSeekChat, ModelDeepSeekReasoner,
 	)
 }
