@@ -80,7 +80,7 @@ type CompletionRequest struct {
 	Model    Model     `json:"model"`
 	Messages []Message `json:"messages"`
 	// optional
-	MaxTokens        uint                `json:"max_tokens,omitempty"`
+	MaxTokens        uint                `json:"max_completion_tokens,omitempty"`
 	User             string              `json:"user,omitempty"`
 	Temperature      *float32            `json:"temperature,omitempty"`
 	TopP             *float32            `json:"top_p,omitempty"`

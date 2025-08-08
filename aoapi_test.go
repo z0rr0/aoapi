@@ -144,7 +144,7 @@ func TestCompletionRequestMarshal(t *testing.T) {
 				`"content":"This is a system message"`,
 				`"role":"user"`,
 				`"content":"This is a user message"`,
-				`"max_tokens":100`,
+				`"max_completion_tokens":100`,
 				`"user":"test"`,
 				`"temperature":0.5`,
 				`"top_p":0.6`,
@@ -155,7 +155,7 @@ func TestCompletionRequestMarshal(t *testing.T) {
 				`"frequency_penalty":0.8`,
 				`"logit_bias":{"a":0.9}`,
 			},
-			length: 304,
+			length: 315,
 		},
 		{
 			name: "partial optional",
@@ -179,10 +179,10 @@ func TestCompletionRequestMarshal(t *testing.T) {
 				`"role":"assistant"`,
 				`"content":"This is an assistant message"`,
 				`"name":"assistant"`,
-				`"max_tokens":250`,
+				`"max_completion_tokens":250`,
 				`"temperature":0.5`,
 			},
-			length: 260,
+			length: 271,
 		},
 	}
 
